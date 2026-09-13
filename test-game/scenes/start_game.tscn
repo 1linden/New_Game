@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://j61o2x4mcehc"]
+
+[ext_resource type="Script" uid="uid://drecixe01m0rg" path="res://scripts/start_game.gd" id="1_tq2sd"]
+[ext_resource type="Texture2D" uid="uid://cswvtiu0w4jwn" path="res://assets/visuals/start_game.png" id="2_tq2sd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_transparent"]
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+bg_color = Color(0, 0, 0, 0.28)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
+bg_color = Color(0, 0, 0, 0.42)
+
+[node name="StartGameScreen" type="Control" unique_id=667110930]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_tq2sd")
+
+[node name="StartGameImage" type="TextureRect" parent="." unique_id=659301573]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+texture = ExtResource("2_tq2sd")
+
+[node name="StartGame" type="Button" parent="." unique_id=1264576594]
+layout_mode = 0
+offset_left = 480.0
+offset_top = 331.0
+offset_right = 801.0
+offset_bottom = 401.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="ExitGame" type="Button" parent="." unique_id=1068121371]
+layout_mode = 0
+offset_left = 480.0
+offset_top = 446.0
+offset_right = 802.0
+offset_bottom = 509.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")

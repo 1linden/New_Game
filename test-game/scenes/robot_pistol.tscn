@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://xowvcuxbpjhe"]
+
+[ext_resource type="Script" uid="uid://b7463j2jdj5ac" path="res://scripts/robot_pistol.gd" id="1_xiutc"]
+[ext_resource type="Texture2D" uid="uid://b2hs5ifulb2gd" path="res://assets/visuals/killer_robot.png" id="3_v407q"]
+[ext_resource type="AudioStream" uid="uid://b7padyv0jbbbi" path="res://assets/audio/laser_gunshot_light.wav" id="4_sycts"]
+[ext_resource type="AudioStream" uid="uid://cuw7hny8hcmn0" path="res://assets/audio/enemy_take_damage.wav" id="5_4ru31"]
+[ext_resource type="Texture2D" uid="uid://dwkt2bnarrqob" path="res://assets/visuals/killer_robot_pistol.png" id="6_v407q"]
+[ext_resource type="PackedScene" uid="uid://ccg1ga1e4mhwf" path="res://scenes/bullet_light.tscn" id="7_mi1rs"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
+size = Vector2(86, 85)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xwavj"]
+size = Vector2(86.000015, 85)
+
+[node name="Robot" type="CharacterBody2D" unique_id=3519924]
+collision_layer = 4
+script = ExtResource("1_xiutc")
+bullet_scene = ExtResource("7_mi1rs")
+
+[node name="RobotLeft" type="Sprite2D" parent="." unique_id=329513902]
+z_index = 2
+position = Vector2(5, 0)
+scale = Vector2(0.08225535, 0.08364154)
+texture = ExtResource("3_v407q")
+
+[node name="CollisionLeft" type="CollisionShape2D" parent="." unique_id=1986017477]
+position = Vector2(-4.000002, -0.5)
+scale = Vector2(0.99999994, 1)
+shape = SubResource("RectangleShape2D_wn4op")
+
+[node name="RobotRight" type="Sprite2D" parent="." unique_id=1608574324]
+z_index = 2
+position = Vector2(5, 0)
+scale = Vector2(0.08225535, 0.08364154)
+texture = ExtResource("3_v407q")
+flip_h = true
+
+[node name="CollisionRight" type="CollisionShape2D" parent="." unique_id=1640758061]
+position = Vector2(14.000002, -0.5)
+scale = Vector2(0.99999994, 1)
+shape = SubResource("RectangleShape2D_xwavj")
+
+[node name="GunshotSound" type="AudioStreamPlayer" parent="." unique_id=836502191]
+stream = ExtResource("4_sycts")
+volume_db = -5.0
+
+[node name="EnemyTakeDamageSound" type="AudioStreamPlayer" parent="." unique_id=735049282]
+stream = ExtResource("5_4ru31")
+
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=1893703074]
+visible = false
+offset_left = -26.0
+offset_top = -58.0
+offset_right = 26.0
+offset_bottom = -50.0
+value = 100.0
+show_percentage = false
+
+[node name="GunPivotLeft" type="Node2D" parent="." unique_id=1242914663]
+position = Vector2(-16, -13)
+
+[node name="GunLeft" type="Sprite2D" parent="GunPivotLeft" unique_id=694623002]
+position = Vector2(-16, -5.9604645e-08)
+rotation = 0.80630744
+scale = Vector2(0.061708856, 0.061708864)
+texture = ExtResource("6_v407q")
+
+[node name="BulletSpawnLeft" type="Marker2D" parent="GunPivotLeft" unique_id=802775524]
+position = Vector2(-30, 0)
+
+[node name="GunPivotRight" type="Node2D" parent="." unique_id=1191972053]
+position = Vector2(26, -13)
+
+[node name="GunRight" type="Sprite2D" parent="GunPivotRight" unique_id=1090768234]
+position = Vector2(16, -1.013279e-06)
+rotation = -0.8063421
+scale = Vector2(0.061708853, 0.061708864)
+texture = ExtResource("6_v407q")
+flip_h = true
+
+[node name="BulletSpawnRight" type="Marker2D" parent="GunPivotRight" unique_id=917040700]
+position = Vector2(30, 0)

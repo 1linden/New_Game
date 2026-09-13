@@ -1,0 +1,160 @@
+[gd_scene format=3 uid="uid://cmpqm3yu22xjp"]
+
+[ext_resource type="Script" path="res://scripts/level_selector.gd" id="1_gkmvm"]
+[ext_resource type="Texture2D" uid="uid://babkrmk6tuw31" path="res://assets/visuals/level_selector.png" id="2_gkmvm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_transparent"]
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+bg_color = Color(0, 0, 0, 0.28)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
+bg_color = Color(0, 0, 0, 0.42)
+
+[node name="LevelSelectorScreen" type="Control" unique_id=667110930]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_gkmvm")
+
+[node name="LevelSelctorImage" type="TextureRect" parent="." unique_id=659301573]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+texture = ExtResource("2_gkmvm")
+
+[node name="Level1" type="Button" parent="." unique_id=1264576594]
+layout_mode = 0
+offset_left = 147.0
+offset_top = 295.0
+offset_right = 314.0
+offset_bottom = 378.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level2" type="Button" parent="." unique_id=2037262178]
+layout_mode = 0
+offset_left = 355.0
+offset_top = 295.0
+offset_right = 522.0
+offset_bottom = 378.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level3" type="Button" parent="." unique_id=1980884275]
+layout_mode = 0
+offset_left = 566.0
+offset_top = 295.0
+offset_right = 733.0
+offset_bottom = 378.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level4" type="Button" parent="." unique_id=397000925]
+layout_mode = 0
+offset_left = 775.0
+offset_top = 295.0
+offset_right = 942.0
+offset_bottom = 378.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level5" type="Button" parent="." unique_id=153285449]
+layout_mode = 0
+offset_left = 982.0
+offset_top = 295.0
+offset_right = 1149.0
+offset_bottom = 378.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level6" type="Button" parent="." unique_id=1832931185]
+layout_mode = 0
+offset_left = 147.0
+offset_top = 420.0
+offset_right = 314.0
+offset_bottom = 503.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level7" type="Button" parent="." unique_id=1811163647]
+layout_mode = 0
+offset_left = 355.0
+offset_top = 420.0
+offset_right = 522.0
+offset_bottom = 503.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level8" type="Button" parent="." unique_id=617582056]
+layout_mode = 0
+offset_left = 565.0
+offset_top = 420.0
+offset_right = 732.0
+offset_bottom = 503.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level9" type="Button" parent="." unique_id=101679549]
+layout_mode = 0
+offset_left = 775.0
+offset_top = 420.0
+offset_right = 942.0
+offset_bottom = 503.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Level10" type="Button" parent="." unique_id=2010177971]
+layout_mode = 0
+offset_left = 982.0
+offset_top = 420.0
+offset_right = 1149.0
+offset_bottom = 503.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+
+[node name="Back" type="Button" parent="." unique_id=1068121371]
+layout_mode = 0
+offset_left = 516.0
+offset_top = 569.0
+offset_right = 765.0
+offset_bottom = 629.0
+theme_override_font_sizes/font_size = 24
+theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
