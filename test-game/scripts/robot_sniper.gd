@@ -13,6 +13,7 @@ var health: int
 var shoot_cooldown_remaining: float = 0.0
 var health_bar_fill_style := StyleBoxFlat.new()
 var facing_right: bool = false
+var damage_flash_tween: Tween
 
 @onready var robot_left: Sprite2D = find_optional_node("RobotLeft", "Sprite2DLeft") as Sprite2D
 @onready var robot_right: Sprite2D = find_optional_node("RobotRight", "Sprite2DRight") as Sprite2D
@@ -192,6 +193,7 @@ func take_damage(amount: int) -> void:
 	update_health_bar()
 
 	if health < previous_health:
+		flash_damage()
 		if health == 0:
 			play_detached_take_damage_sound()
 		else:
@@ -208,6 +210,22 @@ func play_detached_take_damage_sound() -> void:
 	get_tree().current_scene.add_child(sound)
 	sound.finished.connect(sound.queue_free)
 	sound.play()
+
+
+func flash_damage() -> void:
+	if damage_flash_tween != null:
+		damage_flash_tween.kill()
+
+	set_robot_modulate(Color(1, 0.2, 0.2))
+	damage_flash_tween = create_tween()
+	damage_flash_tween.tween_method(set_robot_modulate, Color(1, 0.2, 0.2), Color.WHITE, 0.2)
+
+
+func set_robot_modulate(color: Color) -> void:
+	if robot_left != null:
+		robot_left.modulate = color
+	if robot_right != null:
+		robot_right.modulate = color
 
 
 func setup_health_bar() -> void:

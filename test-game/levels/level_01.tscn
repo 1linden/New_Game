@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://rqvidxntm3sq" path="res://assets/visuals/levelbackground.png" id="2_q7ibo"]
 [ext_resource type="PackedScene" uid="uid://d2skb8ugwnhsj" path="res://scenes/keycard.tscn" id="3_q7ibo"]
 [ext_resource type="PackedScene" uid="uid://c7y3nw2dq4ux5" path="res://scenes/ninja.tscn" id="6_qdeet"]
+[ext_resource type="Texture2D" uid="uid://vlvlhijafl2b" path="res://assets/visuals/tutorial_bubble.png" id="7_cg8v6"]
 [ext_resource type="PackedScene" uid="uid://c03ke8gwp0rgu" path="res://scenes/exit.tscn" id="7_y72ps"]
 [ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="8_xfxon"]
 
@@ -54,7 +55,7 @@ position = Vector2(1296, 360)
 shape = SubResource("RectangleShape2D_boundary")
 
 [node name="Keycard" parent="." unique_id=725782424 instance=ExtResource("3_q7ibo")]
-position = Vector2(581, 646)
+position = Vector2(1038, 646)
 
 [node name="Player" parent="." unique_id=1662097633 instance=ExtResource("6_qdeet")]
 position = Vector2(59, 600)
@@ -212,3 +213,29 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 text = "Restart Level"
+
+[node name="TutorialBubble" type="TextureRect" parent="Interface" unique_id=1601705799]
+offset_left = 439.99997
+offset_top = 54.99997
+offset_right = 1140.0
+offset_bottom = 342.99997
+scale = Vector2(0.58, 0.58)
+texture = ExtResource("7_cg8v6")
+
+[node name="TutorialLabel" type="Label" parent="Interface/TutorialBubble" unique_id=1871145467]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -268.96545
+offset_top = 46.551735
+offset_right = 268.9657
+offset_bottom = 243.10349
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 48
+text = "Collect the Keycard 
+to Advance"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

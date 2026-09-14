@@ -45,4 +45,9 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func change_scene(scene_path: String) -> void:
+	var current_level := get_tree().current_scene
+	if current_level != null and current_level.has_method("change_scene_with_fade"):
+		current_level.change_scene_with_fade(scene_path)
+		return
+
 	get_tree().change_scene_to_file(scene_path)

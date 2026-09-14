@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://bstvatbelrbqe"]
+
+[ext_resource type="Script" uid="uid://bmv6uvirklwx8" path="res://scripts/booster_pad.gd" id="1_l3i0m"]
+[ext_resource type="Texture2D" uid="uid://yqangee7h8jt" path="res://assets/visuals/booster_pad.png" id="2_00s7k"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
+size = Vector2(114, 32)
+
+[node name="BoosterPad" type="Area2D" unique_id=450364295]
+collision_layer = 32
+collision_mask = 2
+script = ExtResource("1_l3i0m")
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=977265388]
+scale = Vector2(0.324, 0.324)
+texture = ExtResource("2_00s7k")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1002168235]
+position = Vector2(0, 40)
+shape = SubResource("RectangleShape2D_wn4op")
+
+[node name="LaunchDirection" type="Marker2D" parent="." unique_id=72252746]
+position = Vector2(0, -53)

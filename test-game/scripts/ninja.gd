@@ -23,6 +23,7 @@ var is_releasing_block: bool = false
 var block_walk_state: int = BlockWalkState.NONE
 var block_walk_uses_transition: bool = false
 var enemies_hit_this_attack: Array[Node] = []
+var damage_flash_tween: Tween
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_walk: CollisionShape2D = $CollisionWalk
@@ -431,6 +432,7 @@ func take_damage(amount: int) -> void:
 
 	if health < previous_health:
 		take_damage_sound.play()
+		flash_damage()
 
 	if health == 0:
 		die()
@@ -440,6 +442,15 @@ func die() -> void:
 	is_dead = true
 	velocity = Vector2.ZERO
 	player_died.emit()
+
+
+func flash_damage() -> void:
+	if damage_flash_tween != null:
+		damage_flash_tween.kill()
+
+	animated_sprite.modulate = Color(1, 0.2, 0.2)
+	damage_flash_tween = create_tween()
+	damage_flash_tween.tween_property(animated_sprite, "modulate", Color.WHITE, 0.2)
 
 
 func is_blocking() -> bool:

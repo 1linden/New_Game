@@ -26,7 +26,7 @@ bg_color = Color(0, 0, 0, 0.42)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
 bg_color = Color(0, 0, 0, 0.28)
 
-[node name="Level05" type="Node2D" unique_id=4761891]
+[node name="Level06" type="Node2D" unique_id=4761891]
 script = ExtResource("1_cg8v6")
 
 [node name="Background" type="Sprite2D" parent="." unique_id=1500914315]
