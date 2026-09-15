@@ -1,23 +1,54 @@
 [gd_scene format=3 uid="uid://bstvatbelrbqe"]
 
 [ext_resource type="Script" uid="uid://bmv6uvirklwx8" path="res://scripts/booster_pad.gd" id="1_l3i0m"]
-[ext_resource type="Texture2D" uid="uid://yqangee7h8jt" path="res://assets/visuals/booster_pad.png" id="2_00s7k"]
+[ext_resource type="Texture2D" uid="uid://co78ngm3q0j6y" path="res://assets/visuals/booster_pad_flame/Flame1.png" id="2_so1we"]
+[ext_resource type="Texture2D" uid="uid://k3c4iy5n40tc" path="res://assets/visuals/booster_pad_flame/Flame4.png" id="3_h4ua3"]
+[ext_resource type="Texture2D" uid="uid://dh3m4nob1wotr" path="res://assets/visuals/booster_pad_flame/Flame5.png" id="3_so1we"]
+[ext_resource type="Texture2D" uid="uid://d1w6kn6d1qaec" path="res://assets/visuals/booster_pad_flame/Flame3.png" id="4_so1we"]
+[ext_resource type="Texture2D" uid="uid://bnqautvc2a3yv" path="res://assets/visuals/booster_pad_flame/Flame2.png" id="5_u104d"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
-size = Vector2(114, 32)
+size = Vector2(115, 42)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wn4op"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_so1we")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_u104d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_so1we")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_h4ua3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_so1we")
+}],
+"loop": 2,
+"name": &"Burn",
+"speed": 12.0
+}]
 
 [node name="BoosterPad" type="Area2D" unique_id=450364295]
 collision_layer = 32
 collision_mask = 2
 script = ExtResource("1_l3i0m")
 
-[node name="Sprite" type="Sprite2D" parent="." unique_id=977265388]
-scale = Vector2(0.324, 0.324)
-texture = ExtResource("2_00s7k")
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1002168235]
-position = Vector2(0, 40)
+z_index = 1
+position = Vector2(0.5, 22)
 shape = SubResource("RectangleShape2D_wn4op")
 
 [node name="LaunchDirection" type="Marker2D" parent="." unique_id=72252746]
 position = Vector2(0, -53)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=269170717]
+position = Vector2(-3.0696392e-06, 4.5000014)
+scale = Vector2(0.24287856, 0.222)
+sprite_frames = SubResource("SpriteFrames_wn4op")
+animation = &"Burn"
+frame_progress = 0.3899192

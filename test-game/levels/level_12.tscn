@@ -146,7 +146,7 @@ scale = Vector2(0.3809488, 0.3809488)
 [node name="Exit" parent="." unique_id=450364295 instance=ExtResource("9_hojmx")]
 z_index = -1
 position = Vector2(100, 571)
-next_level_path = "uid://dd886fcp6bgok"
+next_level_path = "uid://dm5qbsgbl7he5"
 
 [node name="Keycard" parent="." unique_id=725782424 instance=ExtResource("10_ea1m1")]
 position = Vector2(157, 443)

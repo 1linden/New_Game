@@ -12,6 +12,7 @@ enum BlockWalkState { NONE, ENTERING, WALKING, EXITING, EXITING_TO_WALK }
 @export var attack_damage: int = 50
 @export var attack_cooldown_seconds: float = 0.4
 @export var land_animation_seconds: float = 0.12
+@export var horizontal_boost_deceleration: float = 1100
 
 var health: int
 var is_dead: bool = false
@@ -24,6 +25,7 @@ var block_walk_state: int = BlockWalkState.NONE
 var block_walk_uses_transition: bool = false
 var enemies_hit_this_attack: Array[Node] = []
 var damage_flash_tween: Tween
+var horizontal_boost: float = 0.0
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_walk: CollisionShape2D = $CollisionWalk
@@ -76,9 +78,14 @@ func _physics_process(delta: float) -> void:
 
 	var direction := Input.get_axis("move_left", "move_right")
 	var current_movement_speed := movement_speed * sprint_multiplier if direction != 0.0 and Input.is_action_pressed("sprint") and not is_blocking() else movement_speed
-	velocity.x = direction * current_movement_speed
+	var movement_velocity := direction * current_movement_speed
+	if absf(horizontal_boost) > 50.0:
+		movement_velocity *= 0.05
 
-	if is_attacking and is_on_floor():
+	velocity.x = movement_velocity + horizontal_boost
+	horizontal_boost = move_toward(horizontal_boost, 0.0, horizontal_boost_deceleration * delta)
+
+	if is_attacking and is_on_floor() and absf(horizontal_boost) <= 50.0:
 		velocity.x = 0.0
 
 	if Input.is_action_pressed("jump") and is_on_floor():
@@ -420,6 +427,12 @@ func take_bullet_damage(amount: int, bullet_direction: Vector2) -> void:
 		return
 
 	take_damage(amount)
+
+
+func apply_booster_launch(launch_velocity: Vector2) -> void:
+	horizontal_boost = launch_velocity.x
+	if not is_zero_approx(launch_velocity.y):
+		velocity.y = launch_velocity.y
 
 
 func take_damage(amount: int) -> void:

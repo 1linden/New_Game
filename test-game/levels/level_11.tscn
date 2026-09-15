@@ -89,7 +89,6 @@ scale = Vector2(0.3809488, 0.3809488)
 
 [node name="BoosterPad" parent="." unique_id=450364295 instance=ExtResource("9_0cb17")]
 position = Vector2(57, 624)
-rotation = 4.712389
 scale = Vector2(0.75, 0.75)
 
 [node name="BoosterPad2" parent="." unique_id=534265119 instance=ExtResource("9_0cb17")]

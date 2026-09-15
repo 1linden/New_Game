@@ -1,15 +1,16 @@
-[gd_scene format=3 uid="uid://d3tbqf5po5slk"]
+[gd_scene format=3 uid="uid://dm5qbsgbl7he5"]
 
-[ext_resource type="Script" uid="uid://bgah8kbi51gha" path="res://scripts/level.gd" id="1_cg1vn"]
-[ext_resource type="Texture2D" uid="uid://rqvidxntm3sq" path="res://assets/visuals/levelbackground.png" id="2_qu1ij"]
-[ext_resource type="PackedScene" uid="uid://c2heetwx4rlji" path="res://scenes/metal_platform.tscn" id="3_8i6cg"]
-[ext_resource type="PackedScene" uid="uid://xowvcuxbpjhe" path="res://scenes/robot_pistol.tscn" id="5_mype4"]
-[ext_resource type="PackedScene" uid="uid://c3xox0lnqxiby" path="res://scenes/robot_sniper.tscn" id="6_blie1"]
-[ext_resource type="PackedScene" uid="uid://1l81e1n6fgdq" path="res://scenes/robot_smg.tscn" id="7_yp53p"]
-[ext_resource type="PackedScene" uid="uid://c7y3nw2dq4ux5" path="res://scenes/ninja.tscn" id="8_xcgam"]
-[ext_resource type="PackedScene" uid="uid://c03ke8gwp0rgu" path="res://scenes/exit.tscn" id="9_pehbd"]
-[ext_resource type="PackedScene" uid="uid://d2skb8ugwnhsj" path="res://scenes/keycard.tscn" id="10_4yosn"]
-[ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="11_sv7es"]
+[ext_resource type="Script" uid="uid://bgah8kbi51gha" path="res://scripts/level.gd" id="1_et7ot"]
+[ext_resource type="Texture2D" uid="uid://rqvidxntm3sq" path="res://assets/visuals/levelbackground.png" id="2_v8hqk"]
+[ext_resource type="PackedScene" uid="uid://c2heetwx4rlji" path="res://scenes/metal_platform.tscn" id="3_dr5uc"]
+[ext_resource type="PackedScene" uid="uid://doshlcmi2rdfh" path="res://scenes/metal_wall.tscn" id="4_pj5p5"]
+[ext_resource type="PackedScene" uid="uid://xowvcuxbpjhe" path="res://scenes/robot_pistol.tscn" id="5_s4cjh"]
+[ext_resource type="PackedScene" uid="uid://c3xox0lnqxiby" path="res://scenes/robot_sniper.tscn" id="6_mekp2"]
+[ext_resource type="PackedScene" uid="uid://1l81e1n6fgdq" path="res://scenes/robot_smg.tscn" id="7_w3ppe"]
+[ext_resource type="PackedScene" uid="uid://c7y3nw2dq4ux5" path="res://scenes/ninja.tscn" id="8_kmpg7"]
+[ext_resource type="PackedScene" uid="uid://c03ke8gwp0rgu" path="res://scenes/exit.tscn" id="9_g8vfo"]
+[ext_resource type="PackedScene" uid="uid://d2skb8ugwnhsj" path="res://scenes/keycard.tscn" id="10_f77jv"]
+[ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="11_3nr6x"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
 size = Vector2(1280, 62)
@@ -29,13 +30,13 @@ bg_color = Color(0, 0, 0, 0.42)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
 bg_color = Color(0, 0, 0, 0.28)
 
-[node name="Level07" type="Node2D" unique_id=4761891]
-script = ExtResource("1_cg1vn")
+[node name="Level13" type="Node2D" unique_id=4761891]
+script = ExtResource("1_et7ot")
 
 [node name="Background" type="Sprite2D" parent="." unique_id=1500914315]
 z_index = -2
 position = Vector2(640, 360)
-texture = ExtResource("2_qu1ij")
+texture = ExtResource("2_v8hqk")
 
 [node name="Boundaries" type="Node2D" parent="." unique_id=2009343029]
 
@@ -60,89 +61,95 @@ collision_mask = 0
 position = Vector2(1296, 360)
 shape = SubResource("RectangleShape2D_boundary")
 
-[node name="TopBoundary" type="StaticBody2D" parent="Boundaries" unique_id=543800804]
+[node name="TopBoundary" type="StaticBody2D" parent="Boundaries" unique_id=1500238574]
 position = Vector2(478, -338)
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/TopBoundary" unique_id=954735703]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/TopBoundary" unique_id=1222874525]
 position = Vector2(161, 319)
 shape = SubResource("RectangleShape2D_ck2xc")
 
 [node name="Surfaces" type="Node2D" parent="." unique_id=805343588]
 
-[node name="Platform1" parent="Surfaces" unique_id=1665421905 instance=ExtResource("3_8i6cg")]
-position = Vector2(162, 510)
-scale = Vector2(1.33, 0.8)
+[node name="PlatformLeft2" parent="Surfaces" unique_id=1665421905 instance=ExtResource("3_dr5uc")]
+position = Vector2(615, 146)
+scale = Vector2(0.41, 0.665)
 
-[node name="Platform2" parent="Surfaces" unique_id=1238704486 instance=ExtResource("3_8i6cg")]
-position = Vector2(487, 510)
-scale = Vector2(1.33, 0.8)
+[node name="PlatformMiddle2" parent="Surfaces" unique_id=700026687 instance=ExtResource("3_dr5uc")]
+position = Vector2(923.00006, 302)
+scale = Vector2(0.98, 0.665)
 
-[node name="Platform3" parent="Surfaces" unique_id=1831579232 instance=ExtResource("3_8i6cg")]
-position = Vector2(812, 510)
-scale = Vector2(1.33, 0.8)
+[node name="PlatformMiddle6" parent="Surfaces" unique_id=390227732 instance=ExtResource("3_dr5uc")]
+position = Vector2(1160, 457)
+scale = Vector2(0.98, 0.665)
 
-[node name="Platform5" parent="Surfaces" unique_id=1679546409 instance=ExtResource("3_8i6cg")]
-position = Vector2(1118, 340)
-scale = Vector2(1.33, 0.8)
+[node name="PlatformMiddle7" parent="Surfaces" unique_id=997861499 instance=ExtResource("3_dr5uc")]
+position = Vector2(921, 457)
+scale = Vector2(0.98, 0.665)
 
-[node name="Platform6" parent="Surfaces" unique_id=728588001 instance=ExtResource("3_8i6cg")]
-position = Vector2(793, 340)
-scale = Vector2(1.33, 0.8)
+[node name="PlatformMiddle8" parent="Surfaces" unique_id=1604178391 instance=ExtResource("3_dr5uc")]
+position = Vector2(120, 465)
+scale = Vector2(0.98, 0.665)
 
-[node name="Platform7" parent="Surfaces" unique_id=1919906869 instance=ExtResource("3_8i6cg")]
-position = Vector2(468.00003, 340)
-scale = Vector2(1.33, 0.8)
+[node name="PlatformMiddle4" parent="Surfaces" unique_id=2025973188 instance=ExtResource("3_dr5uc")]
+position = Vector2(684, 302)
+scale = Vector2(0.98, 0.665)
 
-[node name="Platform9" parent="Surfaces" unique_id=1694898570 instance=ExtResource("3_8i6cg")]
-position = Vector2(163, 177)
-scale = Vector2(1.33, 0.8)
+[node name="PlatformMiddle3" parent="Surfaces" unique_id=1083372704 instance=ExtResource("3_dr5uc")]
+position = Vector2(1106, 302)
+scale = Vector2(0.52, 0.665)
 
-[node name="Platform10" parent="Surfaces" unique_id=1080612174 instance=ExtResource("3_8i6cg")]
-position = Vector2(488, 177)
-scale = Vector2(1.33, 0.8)
+[node name="PlatformMiddle9" parent="Surfaces" unique_id=1989317991 instance=ExtResource("3_dr5uc")]
+position = Vector2(388, 509)
+scale = Vector2(0.41, 0.665)
 
-[node name="Platform12" parent="Surfaces" unique_id=1697478287 instance=ExtResource("3_8i6cg")]
-position = Vector2(913, 177)
-scale = Vector2(1, 0.8)
+[node name="PlatformMiddle5" parent="Surfaces" unique_id=1450328512 instance=ExtResource("3_dr5uc")]
+position = Vector2(738, 457)
+scale = Vector2(0.52, 0.665)
+
+[node name="Wall" parent="Surfaces" unique_id=1562384634 instance=ExtResource("4_pj5p5")]
+position = Vector2(545, 78)
+scale = Vector2(1, 0.665)
+
+[node name="Wall2" parent="Surfaces" unique_id=1350774806 instance=ExtResource("4_pj5p5")]
+position = Vector2(545, 234)
+scale = Vector2(1, 0.665)
+
+[node name="Wall3" parent="Surfaces" unique_id=682897876 instance=ExtResource("4_pj5p5")]
+position = Vector2(545, 389.00003)
+scale = Vector2(1, 0.665)
 
 [node name="Enemies" type="Node2D" parent="." unique_id=694008477]
 
-[node name="RobotPistol" parent="Enemies" unique_id=3519924 instance=ExtResource("5_mype4")]
-position = Vector2(368, 616)
+[node name="RobotPistol" parent="Enemies" unique_id=3519924 instance=ExtResource("5_s4cjh")]
+position = Vector2(1103, 250)
 
-[node name="RobotPistol2" parent="Enemies" unique_id=1507527503 instance=ExtResource("5_mype4")]
-position = Vector2(474, 616)
+[node name="RobotPistol2" parent="Enemies" unique_id=2096996660 instance=ExtResource("5_s4cjh")]
+position = Vector2(990, 250)
 
-[node name="RobotPistol3" parent="Enemies" unique_id=1906740171 instance=ExtResource("5_mype4")]
-position = Vector2(896, 456)
+[node name="RobotPistol3" parent="Enemies" unique_id=1941569986 instance=ExtResource("5_s4cjh")]
+position = Vector2(955, 405)
 
-[node name="RobotPistol4" parent="Enemies" unique_id=590045542 instance=ExtResource("5_mype4")]
-position = Vector2(378, 285)
+[node name="RobotSniper" parent="Enemies" unique_id=1340941990 instance=ExtResource("6_mekp2")]
+position = Vector2(760, 403)
 
-[node name="RobotSmg" parent="Enemies" unique_id=326667914 instance=ExtResource("7_yp53p")]
-position = Vector2(902, 123)
+[node name="RobotSmg" parent="Enemies" unique_id=723200796 instance=ExtResource("7_w3ppe")]
+position = Vector2(633, 250)
 
-[node name="RobotSmg2" parent="Enemies" unique_id=664298029 instance=ExtResource("7_yp53p")]
-position = Vector2(534, 123)
+[node name="RobotSmg2" parent="Enemies" unique_id=1048829050 instance=ExtResource("7_w3ppe")]
+position = Vector2(70, 413)
 
-[node name="RobotSniper" parent="Enemies" unique_id=1340941990 instance=ExtResource("6_blie1")]
-position = Vector2(1051, 615)
-
-[node name="RobotSniper2" parent="Enemies" unique_id=768150975 instance=ExtResource("6_blie1")]
-position = Vector2(157, 122)
-
-[node name="Player" parent="." unique_id=1662097633 instance=ExtResource("8_xcgam")]
-position = Vector2(59, 600)
+[node name="Player" parent="." unique_id=1662097633 instance=ExtResource("8_kmpg7")]
+position = Vector2(614, 78)
 scale = Vector2(0.3809488, 0.3809488)
 
-[node name="Exit" parent="." unique_id=450364295 instance=ExtResource("9_pehbd")]
+[node name="Exit" parent="." unique_id=450364295 instance=ExtResource("9_g8vfo")]
 z_index = -1
-position = Vector2(1188, 571)
-next_level_path = "uid://d0n1xhe435kms"
+position = Vector2(100, 571)
+next_level_path = "uid://c200wsxsasqkh"
 
-[node name="Keycard" parent="." unique_id=725782424 instance=ExtResource("10_4yosn")]
-position = Vector2(22, 153)
+[node name="Keycard" parent="." unique_id=725782424 instance=ExtResource("10_f77jv")]
+position = Vector2(157, 443)
 
 [node name="Interface" type="CanvasLayer" parent="." unique_id=1686991459]
 
@@ -156,21 +163,21 @@ theme_override_constants/separation = 8
 [node name="Heart1" type="TextureRect" parent="Interface/HealthHearts" unique_id=1460863439]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture = ExtResource("11_sv7es")
+texture = ExtResource("11_3nr6x")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Heart2" type="TextureRect" parent="Interface/HealthHearts" unique_id=1398070122]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture = ExtResource("11_sv7es")
+texture = ExtResource("11_3nr6x")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Heart3" type="TextureRect" parent="Interface/HealthHearts" unique_id=1839085771]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture = ExtResource("11_sv7es")
+texture = ExtResource("11_3nr6x")
 expand_mode = 1
 stretch_mode = 5
 
@@ -183,7 +190,7 @@ offset_top = 16.0
 offset_right = 60.0
 offset_bottom = 48.0
 theme_override_font_sizes/font_size = 28
-text = "Level 7"
+text = "Level 13"
 horizontal_alignment = 1
 
 [node name="PauseButton" type="Button" parent="Interface" unique_id=337811355]
