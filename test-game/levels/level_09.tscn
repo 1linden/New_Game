@@ -88,15 +88,18 @@ scale = Vector2(0.41, 0.665)
 
 [node name="RobotPistol" parent="Enemies" unique_id=3519924 instance=ExtResource("5_1h24w")]
 position = Vector2(635, 203)
+starts_facing_left = false
 
 [node name="RobotPistol2" parent="Enemies" unique_id=1117310679 instance=ExtResource("5_1h24w")]
 position = Vector2(936, 354)
 
 [node name="RobotPistol3" parent="Enemies" unique_id=152756060 instance=ExtResource("5_1h24w")]
 position = Vector2(334, 354)
+starts_facing_left = false
 
 [node name="RobotPistol4" parent="Enemies" unique_id=2041393513 instance=ExtResource("5_1h24w")]
 position = Vector2(448, 616)
+starts_facing_left = false
 
 [node name="RobotPistol5" parent="Enemies" unique_id=772175265 instance=ExtResource("5_1h24w")]
 position = Vector2(832, 616)

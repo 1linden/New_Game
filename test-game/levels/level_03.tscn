@@ -127,6 +127,7 @@ position = Vector2(640, 462.795)
 
 [node name="RobotLeft" parent="Enemies" unique_id=1608355028 instance=ExtResource("4_3ew82")]
 position = Vector2(349.46, 337.7)
+starts_facing_left = false
 
 [node name="RobotRight" parent="Enemies" unique_id=141785390 instance=ExtResource("4_3ew82")]
 position = Vector2(920.745, 338.385)

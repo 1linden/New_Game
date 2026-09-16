@@ -89,6 +89,7 @@ position = Vector2(1069, 613)
 
 [node name="RobotSniperLow" parent="Enemies" unique_id=1007231227 instance=ExtResource("6_plso3")]
 position = Vector2(240, 615)
+starts_facing_left = false
 
 [node name="RobotSnipperHigh" parent="Enemies" unique_id=1056526372 instance=ExtResource("6_plso3")]
 position = Vector2(839, 287)

@@ -76,7 +76,7 @@ position = Vector2(623, 518)
 scale = Vector2(0.6, 0.665)
 
 [node name="PlatformRight" parent="Surfaces" unique_id=2057985882 instance=ExtResource("3_6lgjq")]
-position = Vector2(1064, 518)
+position = Vector2(1032, 517)
 scale = Vector2(0.6, 0.665)
 
 [node name="PlatformRight2" parent="Surfaces" unique_id=230343831 instance=ExtResource("3_6lgjq")]
@@ -87,6 +87,7 @@ scale = Vector2(0.3, 0.665)
 
 [node name="RobotPistol" parent="Enemies" unique_id=3519924 instance=ExtResource("4_kkvbt")]
 position = Vector2(177, 615)
+starts_facing_left = false
 
 [node name="RobotPistol2" parent="Enemies" unique_id=933613239 instance=ExtResource("4_kkvbt")]
 position = Vector2(177, 466)
@@ -98,7 +99,7 @@ position = Vector2(177, 328)
 position = Vector2(1051, 615)
 
 [node name="RobotSniper2" parent="Enemies" unique_id=1232919747 instance=ExtResource("5_ylini")]
-position = Vector2(1051, 466)
+position = Vector2(1000, 465)
 
 [node name="RobotSniper3" parent="Enemies" unique_id=1707089803 instance=ExtResource("5_ylini")]
 position = Vector2(1051, 327.525)
@@ -122,7 +123,7 @@ position = Vector2(1188, 571)
 next_level_path = "uid://bl4chbj08xduh"
 
 [node name="Keycard" parent="." unique_id=725782424 instance=ExtResource("9_5jg1u")]
-position = Vector2(1114, 496)
+position = Vector2(1079, 495)
 
 [node name="Interface" type="CanvasLayer" parent="." unique_id=1686991459]
 

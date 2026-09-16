@@ -95,22 +95,26 @@ scale = Vector2(1, 0.665)
 [node name="Enemies" type="Node2D" parent="." unique_id=694008477]
 
 [node name="RobotSniper" parent="Enemies" unique_id=3519924 instance=ExtResource("6_s88sk")]
-position = Vector2(509, 248)
+position = Vector2(521, 248)
+starts_facing_left = false
 
 [node name="RobotSniper2" parent="Enemies" unique_id=1439203356 instance=ExtResource("6_s88sk")]
 position = Vector2(863, 615)
 
 [node name="RobotSmg" parent="Enemies" unique_id=1744456435 instance=ExtResource("7_aoyam")]
 position = Vector2(742, 249)
+starts_facing_left = false
 
 [node name="RobotSmg2" parent="Enemies" unique_id=2026837382 instance=ExtResource("7_aoyam")]
 position = Vector2(59, 616)
+starts_facing_left = false
 
 [node name="RobotSmg3" parent="Enemies" unique_id=1409542389 instance=ExtResource("7_aoyam")]
 position = Vector2(335, 614)
 
 [node name="RobotPistol" parent="Enemies" unique_id=435416618 instance=ExtResource("5_wgo1c")]
 position = Vector2(869, 249)
+starts_facing_left = false
 
 [node name="Player" parent="." unique_id=1662097633 instance=ExtResource("8_5r2q3")]
 position = Vector2(62, 197)
@@ -122,7 +126,7 @@ position = Vector2(1180, 571)
 next_level_path = "uid://dd886fcp6bgok"
 
 [node name="Keycard" parent="." unique_id=725782424 instance=ExtResource("10_tkuam")]
-position = Vector2(472, 278)
+position = Vector2(472, 279)
 
 [node name="BoosterPad" parent="." unique_id=1296448497 instance=ExtResource("11_enm3r")]
 position = Vector2(1030, 624)

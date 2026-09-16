@@ -13,7 +13,7 @@ size = Vector2(91, 85)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xwavj"]
 size = Vector2(90, 85)
 
-[node name="Robot" type="CharacterBody2D" unique_id=3519924]
+[node name="RobotSmg" type="CharacterBody2D" unique_id=3519924]
 collision_layer = 4
 script = ExtResource("1_xiutc")
 bullet_scene = ExtResource("7_mi1rs")
@@ -50,9 +50,9 @@ stream = ExtResource("5_4ru31")
 
 [node name="HealthBar" type="ProgressBar" parent="." unique_id=1893703074]
 visible = false
-offset_left = -26.0
+offset_left = -22.0
 offset_top = -58.0
-offset_right = 26.0
+offset_right = 30.0
 offset_bottom = -50.0
 value = 100.0
 show_percentage = false

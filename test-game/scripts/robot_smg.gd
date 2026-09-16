@@ -9,6 +9,7 @@ signal defeated
 @export var shots_per_burst: int = 3
 @export var burst_shot_interval_seconds: float = 0.1
 @export var gun_rotation_offset: float = PI
+@export var starts_facing_left: bool = true
 
 var health: int
 var shoot_cooldown_remaining: float = 0.0
@@ -34,7 +35,7 @@ var damage_flash_tween: Tween
 func _ready() -> void:
 	health = maximum_health
 	setup_health_bar()
-	update_facing(false)
+	reset_to_starting_facing()
 
 
 func _physics_process(delta: float) -> void:
@@ -51,11 +52,12 @@ func face_player() -> void:
 	if player == null:
 		return
 
-	facing_right = player.global_position.x > global_position.x
-	update_facing(facing_right)
-	if is_player_in_shoot_range(player):
+	if is_player_in_shoot_range(player) and has_line_of_sight_to(player):
+		facing_right = player.global_position.x > global_position.x
+		update_facing(facing_right)
 		aim_gun_at(player.global_position)
 	else:
+		reset_to_starting_facing()
 		reset_active_gun_rotation()
 
 
@@ -73,6 +75,11 @@ func update_facing(use_right_side: bool) -> void:
 		collision_left.disabled = use_right_side and has_right_collision
 	if collision_right != null:
 		collision_right.disabled = not use_right_side
+
+
+func reset_to_starting_facing() -> void:
+	facing_right = not starts_facing_left
+	update_facing(facing_right)
 
 
 func aim_gun_at(target_position: Vector2) -> void:

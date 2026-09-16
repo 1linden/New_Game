@@ -81,6 +81,7 @@ scale = Vector2(0.465, 1)
 
 [node name="RobotLeft" parent="Enemies" unique_id=2115027144 instance=ExtResource("8_roa4n")]
 position = Vector2(191, 247)
+starts_facing_left = false
 
 [node name="RobotRight" parent="Enemies" unique_id=3519924 instance=ExtResource("8_roa4n")]
 position = Vector2(1079, 247)

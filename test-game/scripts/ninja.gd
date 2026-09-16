@@ -13,6 +13,7 @@ enum BlockWalkState { NONE, ENTERING, WALKING, EXITING, EXITING_TO_WALK }
 @export var attack_cooldown_seconds: float = 0.4
 @export var land_animation_seconds: float = 0.12
 @export var horizontal_boost_deceleration: float = 1100
+@export var starts_facing_left: bool = false
 
 var health: int
 var is_dead: bool = false
@@ -60,6 +61,7 @@ var horizontal_boost: float = 0.0
 
 func _ready() -> void:
 	health = maximum_health
+	animated_sprite.flip_h = starts_facing_left
 	if animated_sprite.sprite_frames.has_animation(&"BlockWalkTransition"):
 		animated_sprite.sprite_frames.set_animation_loop(&"BlockWalkTransition", false)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
@@ -105,7 +107,7 @@ func _physics_process(delta: float) -> void:
 		play_attack_animation()
 	elif blocking:
 		is_releasing_block = false
-		update_block_animation(moving_sideways, block_just_pressed)
+		update_block_animation(moving_sideways, block_just_pressed, is_on_floor())
 
 	move_and_slide()
 
@@ -116,7 +118,7 @@ func _physics_process(delta: float) -> void:
 
 	if blocking:
 		was_blocking = true
-		update_block_animation(moving_sideways, block_just_pressed)
+		update_block_animation(moving_sideways, block_just_pressed, is_on_floor())
 		return
 
 	if was_blocking:
@@ -212,7 +214,17 @@ func play_block_animation() -> void:
 		animated_sprite.play(&"Block")
 
 
-func update_block_animation(moving_sideways: bool, block_just_pressed: bool) -> void:
+func update_block_animation(moving_sideways: bool, block_just_pressed: bool, can_block_walk: bool) -> void:
+	if not can_block_walk:
+		var was_block_walking := is_in_block_walk_animation()
+		block_walk_state = BlockWalkState.NONE
+		block_walk_uses_transition = false
+		if was_block_walking:
+			show_last_block_frame()
+		else:
+			play_block_animation()
+		return
+
 	if moving_sideways:
 		if block_walk_state == BlockWalkState.WALKING:
 			play_block_walk_animation()
@@ -489,7 +501,7 @@ func _on_animation_finished() -> void:
 		return
 
 	if animated_sprite.animation == &"BlockWalkTransition":
-		if block_walk_state == BlockWalkState.ENTERING and is_blocking() and Input.get_axis("move_left", "move_right") != 0.0:
+		if block_walk_state == BlockWalkState.ENTERING and is_blocking() and is_on_floor() and Input.get_axis("move_left", "move_right") != 0.0:
 			block_walk_state = BlockWalkState.WALKING
 			play_block_walk_animation()
 		elif block_walk_state == BlockWalkState.EXITING and is_blocking():
