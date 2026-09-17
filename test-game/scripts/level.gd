@@ -2,6 +2,7 @@ extends Node2D
 
 const START_LEVEL_ACTIONS := [&"move_left", &"move_right", &"jump", &"sprint", &"block", &"attack"]
 const FADE_SECONDS := 0.4
+const BUTTON_SCENE: PackedScene = preload("res://scenes/button.tscn")
 const TUTORIAL_TEXTS: Array[String] = [
 	"Press A to Move Left and D to Move Right",
 	"Hold Shift while Moving to Sprint",
@@ -330,15 +331,13 @@ func setup_sound_toggle_button() -> void:
 	pause_panel.offset_top = -100.0
 	pause_panel.offset_bottom = 100.0
 
-	sound_toggle_button = Button.new()
+	sound_toggle_button = BUTTON_SCENE.instantiate() as Button
 	sound_toggle_button.name = "SoundToggleButton"
 	sound_toggle_button.custom_minimum_size = Vector2(0, 32)
-	sound_toggle_button.add_theme_stylebox_override("normal", main_menu_button.get_theme_stylebox("normal"))
-	sound_toggle_button.add_theme_stylebox_override("pressed", main_menu_button.get_theme_stylebox("pressed"))
-	sound_toggle_button.add_theme_stylebox_override("hover", main_menu_button.get_theme_stylebox("hover"))
-	sound_toggle_button.add_theme_stylebox_override("focus", main_menu_button.get_theme_stylebox("focus"))
+	sound_toggle_button.add_theme_font_size_override("font_size", main_menu_button.get_theme_font_size("font_size"))
 	sound_toggle_button.pressed.connect(_on_sound_toggle_button_pressed)
 	pause_options.add_child(sound_toggle_button)
+	pause_options.move_child(sound_toggle_button, main_menu_button.get_index())
 	update_sound_toggle_button_text()
 
 

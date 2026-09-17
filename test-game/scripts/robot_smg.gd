@@ -52,10 +52,13 @@ func face_player() -> void:
 	if player == null:
 		return
 
-	if is_player_in_shoot_range(player) and has_line_of_sight_to(player):
+	if is_player_in_shoot_range(player):
 		facing_right = player.global_position.x > global_position.x
 		update_facing(facing_right)
-		aim_gun_at(player.global_position)
+		if has_line_of_sight_to(player):
+			aim_gun_at(player.global_position)
+		else:
+			reset_active_gun_rotation()
 	else:
 		reset_to_starting_facing()
 		reset_active_gun_rotation()

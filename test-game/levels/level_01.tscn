@@ -6,7 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://c7y3nw2dq4ux5" path="res://scenes/ninja.tscn" id="6_qdeet"]
 [ext_resource type="Texture2D" uid="uid://vlvlhijafl2b" path="res://assets/visuals/tutorial_bubble.png" id="7_cg8v6"]
 [ext_resource type="PackedScene" uid="uid://c03ke8gwp0rgu" path="res://scenes/exit.tscn" id="7_y72ps"]
+[ext_resource type="Texture2D" uid="uid://dc27y47t72t66" path="res://assets/visuals/blank_button.png" id="8_jy02f"]
 [ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="8_xfxon"]
+[ext_resource type="PackedScene" uid="uid://c7tqvodb5ihp6" path="res://scenes/button.tscn" id="9_h2k5w"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
 size = Vector2(1280, 62)
@@ -14,14 +16,11 @@ size = Vector2(1280, 62)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_boundary"]
 size = Vector2(32, 720)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_transparent"]
-bg_color = Color(1, 1, 1, 0)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_j0sdw"]
+texture = ExtResource("8_jy02f")
+modulate_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
-bg_color = Color(0, 0, 0, 0.42)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
-bg_color = Color(0, 0, 0, 0.28)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pause_panel"]
 
 [node name="Level01" type="Node2D" unique_id=4761891]
 script = ExtResource("1_cg8v6")
@@ -108,7 +107,7 @@ theme_override_font_sizes/font_size = 28
 text = "Level 1"
 horizontal_alignment = 1
 
-[node name="PauseButton" type="Button" parent="Interface" unique_id=337811355]
+[node name="PauseButton" parent="Interface" unique_id=337811355 instance=ExtResource("9_h2k5w")]
 z_index = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -117,6 +116,10 @@ offset_left = -112.0
 offset_top = 16.0
 offset_right = -16.0
 offset_bottom = 48.0
+grow_horizontal = 0
+theme_override_colors/font_disabled_color = Color(0.78431374, 0.78431374, 0.78431374, 0.74509805)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/disabled = SubResource("StyleBoxTexture_j0sdw")
 text = "Pause"
 
 [node name="PauseOverlay" type="ColorRect" parent="Interface" unique_id=1281200591]
@@ -136,6 +139,7 @@ offset_left = -100.0
 offset_top = -76.0
 offset_right = 100.0
 offset_bottom = 76.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_pause_panel")
 
 [node name="Options" type="VBoxContainer" parent="Interface/PauseOverlay/PausePanel" unique_id=473638996]
 layout_mode = 0
@@ -147,31 +151,22 @@ offset_right = -16.0
 offset_bottom = -16.0
 theme_override_constants/separation = 12
 
-[node name="ResumeButton" type="Button" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=921503771]
+[node name="ResumeButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=921503771 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_font_sizes/font_size = 16
 text = "Resume"
 
-[node name="RestartButton" type="Button" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=1285877113]
+[node name="RestartButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=1285877113 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_font_sizes/font_size = 16
 text = "Restart"
 
-[node name="MainMenuButton" type="Button" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=1377104583]
+[node name="MainMenuButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=1377104583 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
+theme_override_font_sizes/font_size = 16
 text = "Main Menu"
 
 [node name="DeathOverlay" type="ColorRect" parent="Interface" unique_id=56823442]

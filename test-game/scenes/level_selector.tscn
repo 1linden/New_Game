@@ -1,16 +1,15 @@
 [gd_scene format=3 uid="uid://cmpqm3yu22xjp"]
 
-[ext_resource type="Script" path="res://scripts/level_selector.gd" id="1_gkmvm"]
-[ext_resource type="Texture2D" uid="uid://babkrmk6tuw31" path="res://assets/visuals/level_selector.png" id="2_gkmvm"]
+[ext_resource type="Script" uid="uid://bcvi1q4jlc0ns" path="res://scripts/level_selector.gd" id="1_gkmvm"]
+[ext_resource type="Texture2D" uid="uid://rqvidxntm3sq" path="res://assets/visuals/levelbackground.png" id="2_gkmvm"]
+[ext_resource type="PackedScene" uid="uid://c7tqvodb5ihp6" path="res://scenes/button.tscn" id="3_tr5s6"]
+[ext_resource type="Texture2D" uid="uid://dc27y47t72t66" path="res://assets/visuals/blank_button.png" id="4_7e8ml"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_transparent"]
-bg_color = Color(1, 1, 1, 0)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rqfkl"]
+texture = ExtResource("4_7e8ml")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
-bg_color = Color(0, 0, 0, 0.28)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
-bg_color = Color(0, 0, 0, 0.42)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_select_static"]
+texture = ExtResource("4_7e8ml")
 
 [node name="LevelSelectorScreen" type="Control" unique_id=667110930]
 layout_mode = 3
@@ -21,140 +20,199 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_gkmvm")
 
-[node name="LevelSelctorImage" type="TextureRect" parent="." unique_id=659301573]
+[node name="LevelSelectorImage" type="TextureRect" parent="." unique_id=659301573]
 layout_mode = 0
 offset_right = 1280.0
 offset_bottom = 720.0
 texture = ExtResource("2_gkmvm")
 
-[node name="Level1" type="Button" parent="." unique_id=1264576594]
+[node name="Back" parent="." unique_id=868041584 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 147.0
-offset_top = 295.0
-offset_right = 314.0
-offset_bottom = 378.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 502.0
+offset_top = 569.07
+offset_right = 778.0
+offset_bottom = 629.0705
+text = "BACK"
 
-[node name="Level2" type="Button" parent="." unique_id=2037262178]
+[node name="Level1" parent="." unique_id=544992027 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 355.0
-offset_top = 295.0
-offset_right = 522.0
-offset_bottom = 378.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 50.83333
+offset_top = 234.0
+offset_right = 245.83333
+offset_bottom = 307.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 1
+"
 
-[node name="Level3" type="Button" parent="." unique_id=1980884275]
+[node name="Level2" parent="." unique_id=228268948 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 566.0
-offset_top = 295.0
-offset_right = 733.0
-offset_bottom = 378.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 296.66666
+offset_top = 234.0
+offset_right = 491.66666
+offset_bottom = 307.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 2
+"
 
-[node name="Level4" type="Button" parent="." unique_id=397000925]
+[node name="Level3" parent="." unique_id=1420615369 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 775.0
-offset_top = 295.0
-offset_right = 942.0
-offset_bottom = 378.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 542.5
+offset_top = 234.0
+offset_right = 737.5
+offset_bottom = 307.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 3
+"
 
-[node name="Level5" type="Button" parent="." unique_id=153285449]
+[node name="Level4" parent="." unique_id=991999537 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 982.0
-offset_top = 295.0
-offset_right = 1149.0
-offset_bottom = 378.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 788.3333
+offset_top = 234.0
+offset_right = 983.3333
+offset_bottom = 307.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 4
+"
 
-[node name="Level6" type="Button" parent="." unique_id=1832931185]
+[node name="Level5" parent="." unique_id=253078166 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 147.0
-offset_top = 420.0
-offset_right = 314.0
-offset_bottom = 503.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 1034.1666
+offset_top = 234.0
+offset_right = 1229.1666
+offset_bottom = 307.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 5
+"
 
-[node name="Level7" type="Button" parent="." unique_id=1811163647]
+[node name="Level6" parent="." unique_id=1722886999 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 355.0
-offset_top = 420.0
-offset_right = 522.0
-offset_bottom = 503.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 50.83333
+offset_top = 333.0
+offset_right = 245.83333
+offset_bottom = 406.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 6
+"
 
-[node name="Level8" type="Button" parent="." unique_id=617582056]
+[node name="Level7" parent="." unique_id=852117638 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 565.0
-offset_top = 420.0
-offset_right = 732.0
-offset_bottom = 503.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 296.66666
+offset_top = 333.0
+offset_right = 491.66666
+offset_bottom = 406.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 7
+"
 
-[node name="Level9" type="Button" parent="." unique_id=101679549]
+[node name="Level8" parent="." unique_id=1043700443 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 775.0
-offset_top = 420.0
-offset_right = 942.0
-offset_bottom = 503.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 542.5
+offset_top = 333.0
+offset_right = 737.5
+offset_bottom = 406.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 8
+"
 
-[node name="Level10" type="Button" parent="." unique_id=2010177971]
+[node name="Level9" parent="." unique_id=1227991507 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 982.0
-offset_top = 420.0
-offset_right = 1149.0
-offset_bottom = 503.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 788.3333
+offset_top = 333.0
+offset_right = 983.3333
+offset_bottom = 406.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 9
+"
 
-[node name="Back" type="Button" parent="." unique_id=1068121371]
+[node name="Level10" parent="." unique_id=642425776 instance=ExtResource("3_tr5s6")]
 layout_mode = 0
-offset_left = 516.0
-offset_top = 569.0
-offset_right = 765.0
-offset_bottom = 629.0
-theme_override_font_sizes/font_size = 24
-theme_override_styles/focus = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/normal = SubResource("StyleBoxFlat_transparent")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+offset_left = 1034.1666
+offset_top = 333.0
+offset_right = 1229.1666
+offset_bottom = 406.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 10
+"
+
+[node name="Level11" parent="." unique_id=1157545446 instance=ExtResource("3_tr5s6")]
+layout_mode = 0
+offset_left = 50.83333
+offset_top = 432.0
+offset_right = 245.83333
+offset_bottom = 505.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 11
+"
+
+[node name="Level12" parent="." unique_id=759392474 instance=ExtResource("3_tr5s6")]
+layout_mode = 0
+offset_left = 296.66666
+offset_top = 432.0
+offset_right = 491.66666
+offset_bottom = 505.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 12
+"
+
+[node name="Level13" parent="." unique_id=594974097 instance=ExtResource("3_tr5s6")]
+layout_mode = 0
+offset_left = 542.5
+offset_top = 432.0
+offset_right = 737.5
+offset_bottom = 505.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 13
+"
+
+[node name="Level14" parent="." unique_id=1122158358 instance=ExtResource("3_tr5s6")]
+layout_mode = 0
+offset_left = 788.3333
+offset_top = 432.0
+offset_right = 983.3333
+offset_bottom = 505.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 14
+"
+
+[node name="Level15" parent="." unique_id=1356478625 instance=ExtResource("3_tr5s6")]
+layout_mode = 0
+offset_left = 1034.1666
+offset_top = 432.0
+offset_right = 1229.1666
+offset_bottom = 505.0
+theme_override_font_sizes/font_size = 39
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqfkl")
+text = "LEVEL 15
+"
+
+[node name="Select Level" parent="." unique_id=1191943150 instance=ExtResource("3_tr5s6")]
+layout_mode = 0
+offset_left = 357.36157
+offset_top = 40.0
+offset_right = 922.6384
+offset_bottom = 188.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 75
+theme_override_styles/normal = SubResource("StyleBoxTexture_select_static")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_select_static")
+theme_override_styles/hover = SubResource("StyleBoxTexture_select_static")
+theme_override_styles/focus = SubResource("StyleBoxTexture_select_static")
+text = "SELECT LEVEL"

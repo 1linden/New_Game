@@ -12,16 +12,16 @@
 [ext_resource type="Texture2D" uid="uid://c5hdun6bky15x" path="res://assets/visuals/ninja_attack/attack6.png" id="7_jecyh"]
 [ext_resource type="AudioStream" uid="uid://cwkmnwxhj2n3u" path="res://assets/audio/take_damage.wav" id="8_g5jtx"]
 [ext_resource type="Texture2D" uid="uid://dffmwncetrox" path="res://assets/visuals/ninja_jump/jump5.png" id="11_flroo"]
-[ext_resource type="Texture2D" uid="uid://cinxwdknrqi5q" path="res://assets/visuals/nina_block_run/1Contact.png" id="11_qod42"]
-[ext_resource type="Texture2D" uid="uid://be2dd0yrngp4o" path="res://assets/visuals/nina_block_run/2Down.png" id="12_dnope"]
+[ext_resource type="Texture2D" uid="uid://cinxwdknrqi5q" path="res://assets/visuals/ninja_block_run/1Contact.png" id="11_qod42"]
+[ext_resource type="Texture2D" uid="uid://be2dd0yrngp4o" path="res://assets/visuals/ninja_block_run/2Down.png" id="12_dnope"]
 [ext_resource type="AudioStream" uid="uid://4ajlkhqx4y37" path="res://assets/audio/attack.wav" id="12_h0xjm"]
-[ext_resource type="Texture2D" uid="uid://b884hu4p5isya" path="res://assets/visuals/nina_block_run/Transition.png" id="12_qod42"]
+[ext_resource type="Texture2D" uid="uid://b884hu4p5isya" path="res://assets/visuals/ninja_block_run/Transition.png" id="12_qod42"]
 [ext_resource type="Texture2D" uid="uid://bfo5p0d3wl3op" path="res://assets/visuals/ninja_jump/jump6.png" id="12_r3ow5"]
-[ext_resource type="Texture2D" uid="uid://yd4pisiqyrni" path="res://assets/visuals/nina_block_run/3Passing.png" id="13_2lc4j"]
+[ext_resource type="Texture2D" uid="uid://yd4pisiqyrni" path="res://assets/visuals/ninja_block_run/3Passing.png" id="13_2lc4j"]
 [ext_resource type="Texture2D" uid="uid://cixtxmbh78ckv" path="res://assets/visuals/ninja_jump/jump1.png" id="13_i36ab"]
-[ext_resource type="Texture2D" uid="uid://c4hepattepi6q" path="res://assets/visuals/nina_block_run/4Up.png" id="14_1251g"]
+[ext_resource type="Texture2D" uid="uid://c4hepattepi6q" path="res://assets/visuals/ninja_block_run/4Up.png" id="14_1251g"]
 [ext_resource type="Texture2D" uid="uid://dogvfwvtwu0fe" path="res://assets/visuals/ninja_jump/jump2.png" id="14_rw5kd"]
-[ext_resource type="Texture2D" uid="uid://bll6bm7oe8adc" path="res://assets/visuals/nina_block_run/5Air.png" id="15_kjt5o"]
+[ext_resource type="Texture2D" uid="uid://bll6bm7oe8adc" path="res://assets/visuals/ninja_block_run/5Air.png" id="15_kjt5o"]
 [ext_resource type="Texture2D" uid="uid://hspadtxqhtxh" path="res://assets/visuals/ninja_jump/jump3.png" id="15_qod42"]
 [ext_resource type="Texture2D" uid="uid://c6haxlcuntwx8" path="res://assets/visuals/ninja_jump/jump4.png" id="16_dnope"]
 [ext_resource type="Texture2D" uid="uid://btnioyakqgkhp" path="res://assets/visuals/ninja_run/1Contact.png" id="17_eamef"]
@@ -266,7 +266,7 @@ script = ExtResource("2_6epgq")
 texture_filter = 1
 position = Vector2(0, -16)
 sprite_frames = SubResource("SpriteFrames_wn4op")
-animation = &"Standing"
+animation = &"BlockWalk"
 autoplay = "Standing"
 
 [node name="TakeDamageSound" type="AudioStreamPlayer" parent="." unique_id=1085532303]
