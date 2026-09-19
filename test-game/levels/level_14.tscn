@@ -180,12 +180,13 @@ z_index = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -112.0
+offset_left = -127.0
 offset_top = 16.0
 offset_right = -16.0
-offset_bottom = 48.0
+offset_bottom = 53.0
+grow_horizontal = 0
 theme_override_colors/font_disabled_color = Color(0.78431374, 0.78431374, 0.78431374, 0.74509805)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 theme_override_styles/disabled = SubResource("StyleBoxTexture_j0sdw")
 text = "Pause"
 

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Lab Assault"
-run/main_scene="uid://c6nnnro6px22q"
+run/main_scene="uid://j61o2x4mcehc"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

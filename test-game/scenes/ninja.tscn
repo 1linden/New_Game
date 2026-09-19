@@ -260,6 +260,7 @@ size = Vector2(199, 231)
 
 [node name="Ninja" type="CharacterBody2D" unique_id=1874358290 groups=["player"]]
 collision_layer = 2
+collision_mask = 33
 script = ExtResource("2_6epgq")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1455171264]

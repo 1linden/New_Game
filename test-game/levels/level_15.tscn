@@ -4,12 +4,14 @@
 [ext_resource type="Texture2D" uid="uid://rqvidxntm3sq" path="res://assets/visuals/levelbackground.png" id="2_om4q0"]
 [ext_resource type="PackedScene" uid="uid://c2heetwx4rlji" path="res://scenes/metal_platform.tscn" id="3_a50we"]
 [ext_resource type="PackedScene" uid="uid://doshlcmi2rdfh" path="res://scenes/metal_wall.tscn" id="4_inh47"]
-[ext_resource type="PackedScene" uid="uid://xowvcuxbpjhe" path="res://scenes/robot_pistol.tscn" id="5_6uant"]
+[ext_resource type="PackedScene" uid="uid://vpv0ikq1gp1e" path="res://scenes/robot_boss.tscn" id="5_01mlm"]
 [ext_resource type="PackedScene" uid="uid://bstvatbelrbqe" path="res://scenes/booster_pad.tscn" id="7_i1ncm"]
-[ext_resource type="PackedScene" uid="uid://c7y3nw2dq4ux5" path="res://scenes/ninja.tscn" id="8_l2vy3"]
-[ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="11_g6v13"]
 [ext_resource type="Texture2D" uid="uid://dc27y47t72t66" path="res://assets/visuals/blank_button.png" id="8_jy02f"]
+[ext_resource type="PackedScene" uid="uid://c7y3nw2dq4ux5" path="res://scenes/ninja.tscn" id="8_l2vy3"]
+[ext_resource type="PackedScene" uid="uid://c03ke8gwp0rgu" path="res://scenes/exit.tscn" id="8_om4q0"]
+[ext_resource type="PackedScene" uid="uid://d2skb8ugwnhsj" path="res://scenes/keycard.tscn" id="9_a50we"]
 [ext_resource type="PackedScene" uid="uid://c7tqvodb5ihp6" path="res://scenes/button.tscn" id="9_h2k5w"]
+[ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="11_g6v13"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
 size = Vector2(1280, 62)
@@ -20,14 +22,8 @@ size = Vector2(32, 720)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ck2xc"]
 size = Vector2(1278, 38)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_transparent"]
-bg_color = Color(1, 1, 1, 0)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
-bg_color = Color(0, 0, 0, 0.42)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
-bg_color = Color(0, 0, 0, 0.28)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3n2sn"]
+bg_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_j0sdw"]
 texture = ExtResource("8_jy02f")
@@ -37,6 +33,8 @@ modulate_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
 
 [node name="Level15" type="Node2D" unique_id=4761891]
 script = ExtResource("1_3n2sn")
+completion_scene_path = "res://scenes/finish_game.tscn"
+reveal_completion_items_after_enemies_defeated = true
 
 [node name="Background" type="Sprite2D" parent="." unique_id=1500914315]
 z_index = -2
@@ -81,16 +79,16 @@ position = Vector2(275, 207.00002)
 scale = Vector2(0.98, 0.665)
 
 [node name="PlatformLeft2" parent="Surfaces" unique_id=1665421905 instance=ExtResource("3_a50we")]
-position = Vector2(480.99997, 207.00002)
-scale = Vector2(0.71, 0.665)
+position = Vector2(517, 207.00002)
+scale = Vector2(1.008, 0.665)
 
 [node name="PlatformRight1" parent="Surfaces" unique_id=2131130164 instance=ExtResource("3_a50we")]
 position = Vector2(1005, 207)
 scale = Vector2(0.98, 0.665)
 
 [node name="PlatformRight2" parent="Surfaces" unique_id=1529634004 instance=ExtResource("3_a50we")]
-position = Vector2(799, 207.00002)
-scale = Vector2(0.71, 0.665)
+position = Vector2(762.99994, 207.00002)
+scale = Vector2(1.008, 0.665)
 
 [node name="Wall2" parent="Surfaces" unique_id=1350774806 instance=ExtResource("4_inh47")]
 position = Vector2(176, 295)
@@ -110,8 +108,16 @@ scale = Vector2(1, 0.665)
 
 [node name="Enemies" type="Node2D" parent="." unique_id=694008477]
 
-[node name="Robot" parent="Enemies" unique_id=3519924 instance=ExtResource("5_6uant")]
-position = Vector2(648, 613)
+[node name="RobotBoss" parent="Enemies" unique_id=3519924 instance=ExtResource("5_01mlm")]
+position = Vector2(620, 490)
+scale = Vector2(4, 4)
+maximum_health = 100
+pistol_shoot_range = 1000.0
+pistol_shoot_cooldown_seconds = 2.0
+smg_shoot_range = 1000.0
+smg_shoot_cooldown_seconds = 20.0
+sniper_shoot_range = 1000.0
+sniper_shoot_cooldown_seconds = 20.0
 
 [node name="Player" parent="." unique_id=1662097633 instance=ExtResource("8_l2vy3")]
 position = Vector2(259, 600)
@@ -121,9 +127,19 @@ scale = Vector2(0.3809488, 0.3809488)
 position = Vector2(57, 624)
 scale = Vector2(0.75, 0.75)
 
-[node name="BoosterPad2" parent="." unique_id=450364295 instance=ExtResource("7_i1ncm")]
+[node name="BoosterPad2" parent="." unique_id=164162261 instance=ExtResource("7_i1ncm")]
 position = Vector2(1223, 624)
 scale = Vector2(0.75, 0.75)
+
+[node name="Exit" parent="." unique_id=450364295 instance=ExtResource("8_om4q0")]
+visible = false
+z_index = -1
+position = Vector2(640, 571)
+next_level_path = "res://scenes/finish_game.tscn"
+
+[node name="Keycard" parent="." unique_id=725782424 instance=ExtResource("9_a50we")]
+visible = false
+position = Vector2(640, 185)
 
 [node name="Interface" type="CanvasLayer" parent="." unique_id=1686991459]
 
@@ -167,17 +183,33 @@ theme_override_font_sizes/font_size = 28
 text = "Level 15"
 horizontal_alignment = 1
 
+[node name="BossHealthBorder" type="Panel" parent="Interface" unique_id=682144984]
+offset_left = 315.0
+offset_top = 59.0
+offset_right = 965.0
+offset_bottom = 93.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_3n2sn")
+
+[node name="BossHealthBar" type="ProgressBar" parent="Interface" unique_id=1885713946]
+offset_left = 320.0
+offset_top = 64.0
+offset_right = 960.0
+offset_bottom = 88.0
+value = 100.0
+show_percentage = false
+
 [node name="PauseButton" parent="Interface" unique_id=337811355 instance=ExtResource("9_h2k5w")]
 z_index = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -112.0
+offset_left = -127.0
 offset_top = 16.0
 offset_right = -16.0
-offset_bottom = 48.0
+offset_bottom = 53.0
+grow_horizontal = 0
 theme_override_colors/font_disabled_color = Color(0.78431374, 0.78431374, 0.78431374, 0.74509805)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 theme_override_styles/disabled = SubResource("StyleBoxTexture_j0sdw")
 text = "Pause"
 

@@ -12,9 +12,12 @@ const TUTORIAL_TEXTS: Array[String] = [
 	"Collect the Keycard\nto Advance",
 ]
 
+@export var completion_scene_path: String = ""
+@export var reveal_completion_items_after_enemies_defeated: bool = false
+
 @onready var player = $Player
 @onready var enemies: Node2D = get_node_or_null("Enemies") as Node2D
-@onready var exit: Area2D = $Exit
+@onready var exit: Area2D = get_node_or_null("Exit") as Area2D
 @onready var keycard: Area2D = get_node_or_null("Keycard") as Area2D
 @onready var interface: CanvasLayer = $Interface
 @onready var level_label: Label = $Interface/LevelLabel
@@ -25,6 +28,7 @@ const TUTORIAL_TEXTS: Array[String] = [
 @onready var resume_button: Button = $Interface/PauseOverlay/PausePanel/Options/ResumeButton
 @onready var restart_button: Button = $Interface/PauseOverlay/PausePanel/Options/RestartButton
 @onready var main_menu_button: Button = $Interface/PauseOverlay/PausePanel/Options/MainMenuButton
+@onready var boss_health_bar: ProgressBar = get_node_or_null("Interface/BossHealthBar") as ProgressBar
 @onready var death_overlay: ColorRect = $Interface/DeathOverlay
 @onready var death_restart_button: Button = $Interface/DeathOverlay/DeathPanel/Options/RestartButton
 @onready var health_hearts: Array[TextureRect] = [
@@ -50,6 +54,8 @@ var tutorial_active: bool = false
 var tutorial_step_index: int = 0
 var tutorial_moved_left: bool = false
 var tutorial_moved_right: bool = false
+var boss_health_bar_fill_style := StyleBoxFlat.new()
+var completion_items_revealed: bool = false
 
 
 func _ready() -> void:
@@ -73,10 +79,24 @@ func _ready() -> void:
 	if keycard != null:
 		keycard.body_entered.connect(_on_keycard_body_entered)
 
+	if reveal_completion_items_after_enemies_defeated:
+		completion_items_revealed = false
+		hide_keycard()
+		hide_exit()
+	else:
+		completion_items_revealed = true
+
+	setup_boss_health_bar()
+
 	if enemies != null:
 		for enemy in enemies.get_children():
 			if enemy.has_signal("defeated"):
 				enemy.defeated.connect(_on_enemy_defeated)
+			if enemy.has_signal("health_changed"):
+				enemy.health_changed.connect(_on_boss_health_changed)
+				if boss_health_bar != null:
+					boss_health_bar.visible = true
+					_on_boss_health_changed(int(enemy.get("health")), int(enemy.get("maximum_health")))
 
 	setup_tutorial()
 	update_health_hearts(player.health)
@@ -200,6 +220,67 @@ func set_keycard_collision_disabled(is_disabled: bool) -> void:
 		keycard_collision.disabled = is_disabled
 
 
+func hide_exit() -> void:
+	if exit == null:
+		return
+
+	exit.visible = false
+	exit.monitoring = false
+	set_exit_collision_disabled(true)
+
+
+func show_exit() -> void:
+	if exit == null:
+		return
+
+	exit.visible = true
+	exit.monitoring = true
+	set_exit_collision_disabled(false)
+
+
+func set_exit_collision_disabled(is_disabled: bool) -> void:
+	var exit_collision := exit.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if exit_collision != null:
+		exit_collision.disabled = is_disabled
+
+
+func setup_boss_health_bar() -> void:
+	if boss_health_bar == null:
+		return
+
+	var background_style := StyleBoxFlat.new()
+	background_style.bg_color = Color(0, 0, 0, 0.55)
+
+	boss_health_bar_fill_style.bg_color = Color.RED
+	boss_health_bar.add_theme_stylebox_override("background", background_style)
+	boss_health_bar.add_theme_stylebox_override("fill", boss_health_bar_fill_style)
+	boss_health_bar.visible = false
+	boss_health_bar.value = boss_health_bar.max_value
+
+
+func _on_boss_health_changed(current_health: int, maximum_health: int) -> void:
+	if boss_health_bar == null:
+		return
+
+	var health_ratio := 0.0 if maximum_health <= 0 else float(current_health) / float(maximum_health)
+	boss_health_bar.value = health_ratio * boss_health_bar.max_value
+	boss_health_bar_fill_style.bg_color = Color.RED
+
+
+func get_health_bar_color(health_ratio: float) -> Color:
+	var red := Color.RED
+	var yellow := Color.YELLOW
+	var green := Color.GREEN
+
+	if health_ratio <= 0.1:
+		return red
+
+	if health_ratio <= 0.5:
+		return red.lerp(yellow, inverse_lerp(0.1, 0.5, health_ratio))
+
+	return yellow.lerp(green, inverse_lerp(0.5, 1.0, health_ratio))
+
+
 func setup_fade_rect() -> void:
 	fade_rect = ColorRect.new()
 	fade_rect.name = "FadeRect"
@@ -251,8 +332,21 @@ func _on_enemy_defeated() -> void:
 
 
 func check_enemies() -> void:
-	if are_enemies_defeated() and keycard_collected:
+	if not are_enemies_defeated():
+		return
+
+	if reveal_completion_items_after_enemies_defeated and not completion_items_revealed:
+		completion_items_revealed = true
+		show_keycard()
+		show_exit()
+
+	if not keycard_collected:
+		return
+
+	if exit != null:
 		exit.unlock()
+	elif not completion_scene_path.is_empty():
+		change_scene_with_fade(completion_scene_path)
 
 
 func are_enemies_defeated() -> bool:

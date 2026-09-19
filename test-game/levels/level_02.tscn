@@ -7,8 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://xowvcuxbpjhe" path="res://scenes/robot_pistol.tscn" id="5_2owmk"]
 [ext_resource type="PackedScene" uid="uid://c7y3nw2dq4ux5" path="res://scenes/ninja.tscn" id="6_qdeet"]
 [ext_resource type="PackedScene" uid="uid://c03ke8gwp0rgu" path="res://scenes/exit.tscn" id="7_y72ps"]
-[ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="8_xfxon"]
 [ext_resource type="Texture2D" uid="uid://dc27y47t72t66" path="res://assets/visuals/blank_button.png" id="8_jy02f"]
+[ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="8_xfxon"]
 [ext_resource type="PackedScene" uid="uid://c7tqvodb5ihp6" path="res://scenes/button.tscn" id="9_h2k5w"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
@@ -16,15 +16,6 @@ size = Vector2(1280, 62)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_boundary"]
 size = Vector2(32, 720)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_transparent"]
-bg_color = Color(1, 1, 1, 0)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
-bg_color = Color(0, 0, 0, 0.42)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
-bg_color = Color(0, 0, 0, 0.28)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_j0sdw"]
 texture = ExtResource("8_jy02f")
@@ -80,7 +71,7 @@ position = Vector2(559, 455)
 position = Vector2(625, 616)
 
 [node name="Player" parent="." unique_id=1662097633 instance=ExtResource("6_qdeet")]
-position = Vector2(76, 600)
+position = Vector2(64, 600)
 scale = Vector2(0.3809488, 0.3809488)
 
 [node name="Exit" parent="." unique_id=450364295 instance=ExtResource("7_y72ps")]
@@ -135,12 +126,13 @@ z_index = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -112.0
+offset_left = -127.0
 offset_top = 16.0
 offset_right = -16.0
-offset_bottom = 48.0
+offset_bottom = 53.0
+grow_horizontal = 0
 theme_override_colors/font_disabled_color = Color(0.78431374, 0.78431374, 0.78431374, 0.74509805)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 theme_override_styles/disabled = SubResource("StyleBoxTexture_j0sdw")
 text = "Pause"
 

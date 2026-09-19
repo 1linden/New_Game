@@ -1,0 +1,308 @@
+extends CharacterBody2D
+
+signal defeated
+signal health_changed(current_health: int, maximum_health: int)
+
+@export var maximum_health: int = 1000
+@export var bullet_scene: PackedScene
+@export var sniper_bullet_scene: PackedScene = preload("res://scenes/bullet_heavy.tscn")
+@export var pistol_shoot_range: float = 300
+@export var pistol_shoot_cooldown_seconds: float = 1.5
+@export var smg_shoot_range: float = 300
+@export var smg_shoot_cooldown_seconds: float = 1.5
+@export var smg_shots_per_burst: int = 3
+@export var smg_burst_shot_interval_seconds: float = 0.1
+@export var sniper_shoot_range: float = 770
+@export var sniper_shoot_cooldown_seconds: float = 3
+@export var sniper_initial_shoot_delay_seconds: float = 1
+@export var gun_rotation_offset: float = PI
+@export var starts_facing_left: bool = true
+
+var health: int
+var pistol_shoot_cooldown_remaining: float = 0.0
+var smg_shoot_cooldown_remaining: float = 0.0
+var smg_burst_shots_remaining: int = 0
+var smg_burst_shot_interval_remaining: float = 0.0
+var sniper_shoot_cooldown_remaining: float = 0.0
+var facing_right: bool = false
+var damage_flash_tween: Tween
+var heavy_gunshot_sound: AudioStreamPlayer
+
+var heavy_gunshot_stream: AudioStream = preload("res://assets/audio/laser_gunshot_heavy.wav")
+
+@onready var robot_left: Sprite2D = find_optional_node("RobotLeft", "Sprite2DLeft") as Sprite2D
+@onready var robot_right: Sprite2D = find_optional_node("RobotRight", "Sprite2DRight") as Sprite2D
+@onready var collision_left: CollisionShape2D = get_node_or_null("CollisionLeft") as CollisionShape2D
+@onready var collision_right: CollisionShape2D = get_node_or_null("CollisionRight") as CollisionShape2D
+@onready var gun_pivot_left: Node2D = $GunPivotLeft
+@onready var gun_pivot_right: Node2D = $GunPivotRight
+@onready var bullet_spawn_pistol_left: Marker2D = $GunPivotLeft/BulletSpawnLeftPistol
+@onready var bullet_spawn_pistol_right: Marker2D = $GunPivotRight/BulletSpawnRightPistol
+@onready var bullet_spawn_smg_left: Marker2D = $GunPivotLeft/BulletSpawnLeftSmg
+@onready var bullet_spawn_smg_right: Marker2D = $GunPivotRight/BulletSpawnRightSmg
+@onready var bullet_spawn_sniper_left: Marker2D = $GunPivotLeft/BulletSpawnLeftSniper
+@onready var bullet_spawn_sniper_right: Marker2D = $GunPivotRight/BulletSpawnRightSniper
+@onready var gunshot_sound: AudioStreamPlayer = $GunshotSound
+@onready var enemy_take_damage_sound: AudioStreamPlayer = $EnemyTakeDamageSound
+
+
+func _ready() -> void:
+	health = maximum_health
+	sniper_shoot_cooldown_remaining = sniper_initial_shoot_delay_seconds
+	setup_heavy_gunshot_sound()
+	reset_to_starting_facing()
+	health_changed.emit(health, maximum_health)
+
+
+func _physics_process(delta: float) -> void:
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	move_and_slide()
+	face_player()
+	update_shooting(delta)
+
+
+func setup_heavy_gunshot_sound() -> void:
+	heavy_gunshot_sound = AudioStreamPlayer.new()
+	heavy_gunshot_sound.name = "HeavyGunshotSound"
+	heavy_gunshot_sound.stream = heavy_gunshot_stream
+	heavy_gunshot_sound.volume_db = gunshot_sound.volume_db
+	add_child(heavy_gunshot_sound)
+
+
+func face_player() -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+
+	if is_player_in_any_shoot_range(player):
+		facing_right = player.global_position.x > global_position.x
+		update_facing(facing_right)
+		aim_all_guns_at(player.global_position)
+	else:
+		reset_to_starting_facing()
+		reset_active_gun_rotations()
+
+
+func update_facing(use_right_side: bool) -> void:
+	set_node_visible(robot_left, not use_right_side)
+	set_node_visible(robot_right, use_right_side)
+	set_node_visible(gun_pivot_left, not use_right_side)
+	set_node_visible(gun_pivot_right, use_right_side)
+
+	if collision_left != null:
+		collision_left.disabled = use_right_side
+	if collision_right != null:
+		collision_right.disabled = not use_right_side
+
+
+func reset_to_starting_facing() -> void:
+	facing_right = not starts_facing_left
+	update_facing(facing_right)
+
+
+func aim_all_guns_at(target_position: Vector2) -> void:
+	aim_gun_at(get_active_gun_pivot(), target_position)
+
+
+func aim_gun_at(gun_pivot: Node2D, target_position: Vector2) -> void:
+	if gun_pivot == null:
+		return
+
+	var aim_direction := gun_pivot.global_position.direction_to(target_position)
+	if aim_direction == Vector2.ZERO:
+		return
+
+	gun_pivot.global_rotation = aim_direction.angle() if facing_right else aim_direction.angle() + gun_rotation_offset
+
+
+func update_shooting(delta: float) -> void:
+	if not is_level_started():
+		return
+
+	pistol_shoot_cooldown_remaining = maxf(pistol_shoot_cooldown_remaining - delta, 0.0)
+	smg_shoot_cooldown_remaining = maxf(smg_shoot_cooldown_remaining - delta, 0.0)
+	smg_burst_shot_interval_remaining = maxf(smg_burst_shot_interval_remaining - delta, 0.0)
+	sniper_shoot_cooldown_remaining = maxf(sniper_shoot_cooldown_remaining - delta, 0.0)
+
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+
+	update_pistol_shooting(player)
+	update_smg_shooting(player)
+	update_sniper_shooting(player)
+
+
+func update_pistol_shooting(player: Node2D) -> void:
+	if pistol_shoot_cooldown_remaining > 0.0 or bullet_scene == null:
+		return
+	if not can_weapon_shoot(player, get_active_gun_pivot(), pistol_shoot_range):
+		return
+
+	shoot_weapon(player.global_position, bullet_scene, get_active_gun_pivot(), get_active_pistol_spawn(), 1, gunshot_sound)
+	pistol_shoot_cooldown_remaining = pistol_shoot_cooldown_seconds
+
+
+func update_smg_shooting(player: Node2D) -> void:
+	if bullet_scene == null:
+		return
+	if smg_burst_shots_remaining == 0 and smg_shoot_cooldown_remaining > 0.0:
+		return
+	if not can_weapon_shoot(player, get_active_gun_pivot(), smg_shoot_range):
+		return
+
+	if smg_burst_shots_remaining == 0:
+		smg_burst_shots_remaining = smg_shots_per_burst
+		smg_burst_shot_interval_remaining = 0.0
+
+	if smg_burst_shot_interval_remaining > 0.0:
+		return
+
+	shoot_weapon(player.global_position, bullet_scene, get_active_gun_pivot(), get_active_smg_spawn(), 1, gunshot_sound)
+	smg_burst_shots_remaining -= 1
+
+	if smg_burst_shots_remaining > 0:
+		smg_burst_shot_interval_remaining = smg_burst_shot_interval_seconds
+	else:
+		smg_shoot_cooldown_remaining = smg_shoot_cooldown_seconds
+
+
+func update_sniper_shooting(player: Node2D) -> void:
+	if sniper_shoot_cooldown_remaining > 0.0 or sniper_bullet_scene == null:
+		return
+	if not can_weapon_shoot(player, get_active_gun_pivot(), sniper_shoot_range):
+		return
+
+	shoot_weapon(player.global_position, sniper_bullet_scene, get_active_gun_pivot(), get_active_sniper_spawn(), 3, heavy_gunshot_sound)
+	sniper_shoot_cooldown_remaining = sniper_shoot_cooldown_seconds
+
+
+func can_weapon_shoot(player: Node2D, gun_pivot: Node2D, weapon_range: float) -> bool:
+	if gun_pivot == null:
+		return false
+	if gun_pivot.global_position.distance_to(player.global_position) > weapon_range:
+		return false
+
+	return has_line_of_sight_to(player, gun_pivot.global_position)
+
+
+func has_line_of_sight_to(target: Node2D, origin: Vector2) -> bool:
+	var query := PhysicsRayQueryParameters2D.create(origin, target.global_position, 1)
+	query.exclude = [self]
+
+	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
+
+
+func shoot_weapon(target_position: Vector2, weapon_bullet_scene: PackedScene, gun_pivot: Node2D, bullet_spawn: Marker2D, damage: int, sound: AudioStreamPlayer) -> void:
+	if weapon_bullet_scene == null or gun_pivot == null:
+		return
+
+	var bullet := weapon_bullet_scene.instantiate() as Area2D
+	get_tree().current_scene.add_child(bullet)
+	bullet.scale = Vector2(2.0, 2.0)
+
+	var shoot_direction := gun_pivot.global_position.direction_to(target_position)
+	var spawn_position := bullet_spawn.global_position if bullet_spawn != null else gun_pivot.global_position
+	bullet.collision_layer = 16
+	bullet.collision_mask = 3
+	bullet.damage = damage
+	bullet.launch(spawn_position, shoot_direction.angle())
+	sound.play()
+
+
+func get_active_gun_pivot() -> Node2D:
+	return gun_pivot_right if facing_right else gun_pivot_left
+
+
+func get_active_pistol_spawn() -> Marker2D:
+	return bullet_spawn_pistol_right if facing_right else bullet_spawn_pistol_left
+
+
+func get_active_smg_spawn() -> Marker2D:
+	return bullet_spawn_smg_right if facing_right else bullet_spawn_smg_left
+
+
+func get_active_sniper_spawn() -> Marker2D:
+	return bullet_spawn_sniper_right if facing_right else bullet_spawn_sniper_left
+
+
+func reset_active_gun_rotations() -> void:
+	var gun_pivot := get_active_gun_pivot()
+	if gun_pivot != null:
+		gun_pivot.rotation = 0.0
+
+
+func set_node_visible(node: CanvasItem, should_be_visible: bool) -> void:
+	if node != null:
+		node.visible = should_be_visible
+
+
+func find_optional_node(primary_path: NodePath, fallback_path: NodePath) -> Node:
+	var node := get_node_or_null(primary_path)
+	if node != null:
+		return node
+
+	return get_node_or_null(fallback_path)
+
+
+func is_player_in_any_shoot_range(player: Node2D) -> bool:
+	return global_position.distance_to(player.global_position) <= maxf(sniper_shoot_range, maxf(pistol_shoot_range, smg_shoot_range))
+
+
+func is_level_started() -> bool:
+	var current_level := get_tree().current_scene
+	if current_level == null or current_level == self:
+		return true
+
+	if not current_level.has_method("is_level_started"):
+		return true
+
+	return current_level.is_level_started()
+
+
+func take_damage(amount: int) -> void:
+	var previous_health := health
+	health = max(health - amount, 0)
+	health_changed.emit(health, maximum_health)
+
+	if health < previous_health:
+		flash_damage()
+		if health == 0:
+			play_detached_take_damage_sound()
+		else:
+			enemy_take_damage_sound.play()
+
+	if health == 0:
+		die()
+
+
+func play_detached_take_damage_sound() -> void:
+	var sound := AudioStreamPlayer.new()
+	sound.stream = enemy_take_damage_sound.stream
+	sound.bus = enemy_take_damage_sound.bus
+	get_tree().current_scene.add_child(sound)
+	sound.finished.connect(sound.queue_free)
+	sound.play()
+
+
+func flash_damage() -> void:
+	if damage_flash_tween != null:
+		damage_flash_tween.kill()
+
+	set_robot_modulate(Color(1, 0.2, 0.2))
+	damage_flash_tween = create_tween()
+	damage_flash_tween.tween_method(set_robot_modulate, Color(1, 0.2, 0.2), Color.WHITE, 0.2)
+
+
+func set_robot_modulate(color: Color) -> void:
+	if robot_left != null:
+		robot_left.modulate = color
+	if robot_right != null:
+		robot_right.modulate = color
+
+
+func die() -> void:
+	defeated.emit()
+	call_deferred("queue_free")

@@ -1,6 +1,6 @@
 extends Node
 
-const MAX_LEVEL := 10
+const MAX_LEVEL := 15
 
 var highest_unlocked_level: int = 1
 

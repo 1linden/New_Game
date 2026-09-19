@@ -93,9 +93,6 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_pressed("jump") and is_on_floor():
 		velocity.y = jump_velocity
 
-	if Input.is_action_just_pressed("attack") and can_start_attack():
-		start_attack()
-
 	if direction != 0.0:
 		animated_sprite.flip_h = direction < 0.0
 
@@ -145,6 +142,11 @@ func _input(event: InputEvent) -> void:
 	for action in [&"move_left", &"move_right", &"jump", &"sprint", &"block", &"attack"]:
 		if event.is_action_pressed(action):
 			print_action_debug(action)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("attack") and can_start_attack():
+		start_attack()
 
 
 func print_action_debug(action: StringName) -> void:
