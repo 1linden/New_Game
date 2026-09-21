@@ -14,6 +14,9 @@
 [ext_resource type="Texture2D" uid="uid://dc27y47t72t66" path="res://assets/visuals/blank_button.png" id="8_jy02f"]
 [ext_resource type="PackedScene" uid="uid://c7tqvodb5ihp6" path="res://scenes/button.tscn" id="9_h2k5w"]
 
+[ext_resource type="Texture2D" uid="uid://dop2nticivh20" path="res://assets/visuals/blank_text_background.png" id="10_kjd3d"]
+[ext_resource type="FontFile" uid="uid://dpj6imxfo1147" path="res://assets/fonts/Oxanium-Bold.ttf" id="11_qdeet"]
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
 size = Vector2(1280, 62)
 
@@ -37,6 +40,9 @@ texture = ExtResource("8_jy02f")
 modulate_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pause_panel"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_om4q0"]
+texture = ExtResource("8_jy02f")
 
 [node name="Level08" type="Node2D" unique_id=4761891]
 script = ExtResource("1_ck2xc")
@@ -205,6 +211,7 @@ offset_left = -60.0
 offset_top = 16.0
 offset_right = 60.0
 offset_bottom = 48.0
+theme_override_fonts/font = ExtResource("11_qdeet")
 theme_override_font_sizes/font_size = 28
 text = "Level 8"
 horizontal_alignment = 1
@@ -289,6 +296,7 @@ offset_left = -120.0
 offset_top = -64.0
 offset_right = 120.0
 offset_bottom = 64.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_pause_panel")
 
 [node name="Options" type="VBoxContainer" parent="Interface/DeathOverlay/DeathPanel" unique_id=684809805]
 layout_mode = 0
@@ -300,13 +308,29 @@ offset_right = -16.0
 offset_bottom = -16.0
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="Interface/DeathOverlay/DeathPanel/Options" unique_id=1323903400]
+[node name="TextureRect" type="TextureRect" parent="Interface/DeathOverlay/DeathPanel/Options" unique_id=1248569480]
+custom_minimum_size = Vector2(0, 75)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+texture = ExtResource("10_kjd3d")
+expand_mode = 1
+
+[node name="YouDied" type="Label" parent="Interface/DeathOverlay/DeathPanel/Options/TextureRect" unique_id=730808273]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 12.0
+offset_right = 198.0
+offset_bottom = 63.0
+theme_override_colors/font_outline_color = Color(0.19607843, 0.7490196, 1, 0.5882353)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("11_qdeet")
+theme_override_font_sizes/font_size = 42
 text = "You Died"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="RestartButton" type="Button" parent="Interface/DeathOverlay/DeathPanel/Options" unique_id=835879924]
-custom_minimum_size = Vector2(0, 36)
+[node name="RestartButton" parent="Interface/DeathOverlay/DeathPanel/Options" unique_id=835879924 instance=ExtResource("9_h2k5w")]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+theme_override_font_sizes/font_size = 16
 text = "Restart Level"
+

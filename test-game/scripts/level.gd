@@ -14,6 +14,8 @@ const TUTORIAL_TEXTS: Array[String] = [
 
 @export var completion_scene_path: String = ""
 @export var reveal_completion_items_after_enemies_defeated: bool = false
+@export_range(0.0, 1.0, 0.01) var boss_minions_spawn_at_health_ratio: float = 0.0
+@export var boss_minions_spawn_health_threshold: Array[float] = []
 
 @onready var player = $Player
 @onready var enemies: Node2D = get_node_or_null("Enemies") as Node2D
@@ -28,6 +30,7 @@ const TUTORIAL_TEXTS: Array[String] = [
 @onready var resume_button: Button = $Interface/PauseOverlay/PausePanel/Options/ResumeButton
 @onready var restart_button: Button = $Interface/PauseOverlay/PausePanel/Options/RestartButton
 @onready var main_menu_button: Button = $Interface/PauseOverlay/PausePanel/Options/MainMenuButton
+@onready var boss_health_border: Panel = get_node_or_null("Interface/BossHealthBorder") as Panel
 @onready var boss_health_bar: ProgressBar = get_node_or_null("Interface/BossHealthBar") as ProgressBar
 @onready var death_overlay: ColorRect = $Interface/DeathOverlay
 @onready var death_restart_button: Button = $Interface/DeathOverlay/DeathPanel/Options/RestartButton
@@ -44,6 +47,7 @@ var tutorial_step_sound: AudioStream = preload("res://assets/audio/tutorial_step
 var keycard_collected: bool = false
 var keycard_pickup_sound: AudioStreamPlayer
 var tutorial_step_sound_player: AudioStreamPlayer
+var skip_level_button: Button
 var sound_toggle_button: Button
 var level_started: bool = false
 var fade_rect: ColorRect
@@ -56,6 +60,12 @@ var tutorial_moved_left: bool = false
 var tutorial_moved_right: bool = false
 var boss_health_bar_fill_style := StyleBoxFlat.new()
 var completion_items_revealed: bool = false
+var boss_enemy: Node
+var boss_minions: Array[Node] = []
+var boss_minion_spawn_data: Array[Dictionary] = []
+var boss_minion_spawn_ratios: Array[float] = []
+var completed_boss_minion_waves: int = 0
+var boss_minions_wave_active: bool = false
 
 
 func _ready() -> void:
@@ -93,20 +103,27 @@ func _ready() -> void:
 			if enemy.has_signal("defeated"):
 				enemy.defeated.connect(_on_enemy_defeated)
 			if enemy.has_signal("health_changed"):
+				boss_enemy = enemy
 				enemy.health_changed.connect(_on_boss_health_changed)
 				if boss_health_bar != null:
 					boss_health_bar.visible = true
 					_on_boss_health_changed(int(enemy.get("health")), int(enemy.get("maximum_health")))
+		setup_boss_minions_phase()
 
 	setup_tutorial()
 	update_health_hearts(player.health)
 	update_level_label()
-	print("NEW LEVEL: ", level_label.text)
+	#print("NEW LEVEL: ", level_label.text)
 	check_enemies()
 	fade_in()
 
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("close_menu") and pause_overlay.visible:
+		set_paused(false)
+		get_viewport().set_input_as_handled()
+		return
+
 	for action in START_LEVEL_ACTIONS:
 		if event.is_action_pressed(action):
 			level_started = true
@@ -255,6 +272,8 @@ func setup_boss_health_bar() -> void:
 	boss_health_bar.add_theme_stylebox_override("background", background_style)
 	boss_health_bar.add_theme_stylebox_override("fill", boss_health_bar_fill_style)
 	boss_health_bar.visible = false
+	if boss_health_border != null:
+		boss_health_border.visible = false
 	boss_health_bar.value = boss_health_bar.max_value
 
 
@@ -265,6 +284,9 @@ func _on_boss_health_changed(current_health: int, maximum_health: int) -> void:
 	var health_ratio := 0.0 if maximum_health <= 0 else float(current_health) / float(maximum_health)
 	boss_health_bar.value = health_ratio * boss_health_bar.max_value
 	boss_health_bar_fill_style.bg_color = Color.RED
+	if boss_health_border != null:
+		boss_health_border.visible = boss_health_bar.visible
+	maybe_start_boss_minions_phase(current_health, maximum_health)
 
 
 func get_health_bar_color(health_ratio: float) -> Color:
@@ -328,7 +350,21 @@ func set_fade_alpha(alpha: float) -> void:
 func _on_enemy_defeated() -> void:
 	# The enemy uses queue_free(), so wait until it has been removed.
 	await get_tree().process_frame
+	if boss_minions_wave_active and are_boss_minions_defeated():
+		boss_minions_wave_active = false
+		completed_boss_minion_waves += 1
+		set_boss_shooting_disabled(false)
+		set_boss_damage_disabled(false)
+	if are_enemies_defeated():
+		hide_boss_health_ui()
 	check_enemies()
+
+
+func hide_boss_health_ui() -> void:
+	if boss_health_bar != null:
+		boss_health_bar.visible = false
+	if boss_health_border != null:
+		boss_health_border.visible = false
 
 
 func check_enemies() -> void:
@@ -351,6 +387,159 @@ func check_enemies() -> void:
 
 func are_enemies_defeated() -> bool:
 	return enemies == null or enemies.get_child_count() == 0
+
+
+func setup_boss_minions_phase() -> void:
+	boss_minion_spawn_ratios = get_boss_minion_spawn_ratios()
+	if boss_minion_spawn_ratios.is_empty() or boss_enemy == null or enemies == null:
+		return
+
+	boss_minions.clear()
+	boss_minion_spawn_data.clear()
+	for enemy in enemies.get_children():
+		if enemy == boss_enemy:
+			continue
+		boss_minions.append(enemy)
+		boss_minion_spawn_data.append(get_boss_minion_spawn_data(enemy))
+		set_enemy_active(enemy, false)
+
+
+func maybe_start_boss_minions_phase(current_health: int, maximum_health: int) -> void:
+	if boss_minion_spawn_ratios.is_empty() or boss_minions_wave_active or maximum_health <= 0:
+		return
+	if completed_boss_minion_waves >= boss_minion_spawn_ratios.size():
+		return
+
+	var health_ratio := float(current_health) / float(maximum_health)
+	if health_ratio > boss_minion_spawn_ratios[completed_boss_minion_waves]:
+		return
+
+	boss_minions_wave_active = true
+	set_boss_shooting_disabled(true)
+	set_boss_damage_disabled(true)
+	keep_boss_alive_during_add_wave()
+	spawn_boss_minion_wave()
+
+
+func are_boss_minions_defeated() -> bool:
+	for boss_minion in boss_minions:
+		if is_instance_valid(boss_minion) and boss_minion.is_inside_tree():
+			return false
+	return true
+
+
+func get_boss_minion_spawn_ratios() -> Array[float]:
+	var spawn_ratios: Array[float] = boss_minions_spawn_health_threshold.duplicate()
+	if spawn_ratios.is_empty() and boss_minions_spawn_at_health_ratio > 0.0:
+		spawn_ratios.append(boss_minions_spawn_at_health_ratio)
+
+	spawn_ratios.sort()
+	spawn_ratios.reverse()
+	return spawn_ratios
+
+
+func get_boss_minion_spawn_data(enemy: Node) -> Dictionary:
+	return {
+		"scene_path": enemy.scene_file_path,
+		"name": enemy.name,
+		"position": enemy.position,
+		"rotation": enemy.rotation,
+		"scale": enemy.scale,
+	}
+
+
+func spawn_boss_minion_wave() -> void:
+	var spawned_boss_minions: Array[Node] = []
+	for index in boss_minion_spawn_data.size():
+		var boss_minion := get_boss_minion_for_wave(index)
+		if boss_minion == null:
+			continue
+
+		spawned_boss_minions.append(boss_minion)
+		connect_boss_minion_signals(boss_minion)
+		set_enemy_active(boss_minion, true)
+
+	boss_minions = spawned_boss_minions
+
+
+func get_boss_minion_for_wave(index: int) -> Node:
+	var existing_boss_minion := boss_minions[index] if index < boss_minions.size() else null
+	if is_instance_valid(existing_boss_minion) and existing_boss_minion.is_inside_tree():
+		return existing_boss_minion
+
+	return create_boss_minion_from_spawn_data(boss_minion_spawn_data[index])
+
+
+func create_boss_minion_from_spawn_data(spawn_data: Dictionary) -> Node:
+	var scene_path := String(spawn_data["scene_path"])
+	if scene_path.is_empty():
+		return null
+
+	var boss_minion_scene := load(scene_path) as PackedScene
+	if boss_minion_scene == null:
+		return null
+
+	var boss_minion := boss_minion_scene.instantiate()
+	boss_minion.name = String(spawn_data["name"])
+	boss_minion.position = spawn_data["position"] as Vector2
+	boss_minion.rotation = float(spawn_data["rotation"])
+	boss_minion.scale = spawn_data["scale"] as Vector2
+	enemies.add_child(boss_minion)
+	return boss_minion
+
+
+func connect_boss_minion_signals(boss_minion: Node) -> void:
+	if boss_minion.has_signal("defeated") and not boss_minion.defeated.is_connected(_on_enemy_defeated):
+		boss_minion.defeated.connect(_on_enemy_defeated)
+
+
+func set_boss_shooting_disabled(is_disabled: bool) -> void:
+	if boss_enemy != null and is_instance_valid(boss_enemy) and boss_enemy.has_method("set_shooting_disabled"):
+		boss_enemy.set_shooting_disabled(is_disabled)
+
+
+func set_boss_damage_disabled(is_disabled: bool) -> void:
+	if boss_enemy != null and is_instance_valid(boss_enemy) and boss_enemy.has_method("set_damage_disabled"):
+		boss_enemy.set_damage_disabled(is_disabled)
+
+
+func keep_boss_alive_during_add_wave() -> void:
+	if boss_enemy != null and is_instance_valid(boss_enemy) and boss_enemy.has_method("keep_alive_during_add_wave"):
+		boss_enemy.keep_alive_during_add_wave()
+
+
+func set_enemy_active(enemy: Node, is_active: bool) -> void:
+	if not is_instance_valid(enemy):
+		return
+
+	enemy.visible = is_active
+	enemy.process_mode = Node.PROCESS_MODE_INHERIT if is_active else Node.PROCESS_MODE_DISABLED
+	set_collision_objects_active(enemy, is_active)
+
+
+func set_collision_objects_active(node: Node, is_active: bool) -> void:
+	var collision_object := node as CollisionObject2D
+	if collision_object != null:
+		set_collision_object_active(collision_object, is_active)
+
+	for child in node.get_children():
+		set_collision_objects_active(child, is_active)
+
+
+func set_collision_object_active(collision_object: CollisionObject2D, is_active: bool) -> void:
+	if is_active:
+		if collision_object.has_meta("disabled_boss_minion_collision_layer"):
+			collision_object.collision_layer = int(collision_object.get_meta("disabled_boss_minion_collision_layer"))
+		if collision_object.has_meta("disabled_boss_minion_collision_mask"):
+			collision_object.collision_mask = int(collision_object.get_meta("disabled_boss_minion_collision_mask"))
+		return
+
+	if not collision_object.has_meta("disabled_boss_minion_collision_layer"):
+		collision_object.set_meta("disabled_boss_minion_collision_layer", collision_object.collision_layer)
+		collision_object.set_meta("disabled_boss_minion_collision_mask", collision_object.collision_mask)
+
+	collision_object.collision_layer = 0
+	collision_object.collision_mask = 0
 
 
 func _on_keycard_body_entered(body: Node2D) -> void:
@@ -422,8 +611,17 @@ func _on_main_menu_button_pressed() -> void:
 
 
 func setup_sound_toggle_button() -> void:
-	pause_panel.offset_top = -100.0
-	pause_panel.offset_bottom = 100.0
+	pause_panel.offset_top = -136.0
+	pause_panel.offset_bottom = 136.0
+
+	skip_level_button = BUTTON_SCENE.instantiate() as Button
+	skip_level_button.name = "SkipLevelButton"
+	skip_level_button.custom_minimum_size = Vector2(0, 32)
+	skip_level_button.add_theme_font_size_override("font_size", main_menu_button.get_theme_font_size("font_size"))
+	skip_level_button.text = "Skip Level"
+	skip_level_button.pressed.connect(_on_skip_level_button_pressed)
+	pause_options.add_child(skip_level_button)
+	pause_options.move_child(skip_level_button, main_menu_button.get_index())
 
 	sound_toggle_button = BUTTON_SCENE.instantiate() as Button
 	sound_toggle_button.name = "SoundToggleButton"
@@ -433,6 +631,32 @@ func setup_sound_toggle_button() -> void:
 	pause_options.add_child(sound_toggle_button)
 	pause_options.move_child(sound_toggle_button, main_menu_button.get_index())
 	update_sound_toggle_button_text()
+
+
+func _on_skip_level_button_pressed() -> void:
+	UISounds.play_button_clicked()
+
+	var next_level_path := get_skip_level_path()
+	if next_level_path.is_empty():
+		return
+
+	GameProgress.complete_level(get_tree().current_scene.scene_file_path)
+	get_tree().paused = false
+	change_scene_with_fade(next_level_path)
+
+
+func get_skip_level_path() -> String:
+	if exit != null and not exit.next_level_path.is_empty():
+		return exit.next_level_path
+
+	var current_level_number := GameProgress.get_level_number_from_path(get_tree().current_scene.scene_file_path)
+	if current_level_number <= 0:
+		return ""
+
+	if current_level_number >= GameProgress.MAX_LEVEL:
+		return completion_scene_path if not completion_scene_path.is_empty() else "res://scenes/finish_game.tscn"
+
+	return "res://levels/level_%02d.tscn" % (current_level_number + 1)
 
 
 func _on_sound_toggle_button_pressed() -> void:
@@ -459,3 +683,14 @@ func set_paused(is_paused: bool) -> void:
 	pause_overlay.visible = is_paused
 	pause_button.text = "Pause"
 	pause_button.disabled = is_paused
+
+
+func is_pause_menu_open() -> bool:
+	return pause_overlay.visible
+
+
+func close_pause_menu() -> void:
+	if not pause_overlay.visible:
+		return
+
+	set_paused(false)

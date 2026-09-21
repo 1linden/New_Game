@@ -27,6 +27,7 @@ var block_walk_uses_transition: bool = false
 var enemies_hit_this_attack: Array[Node] = []
 var damage_flash_tween: Tween
 var horizontal_boost: float = 0.0
+var god_mode_enabled: bool = false
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_walk: CollisionShape2D = $CollisionWalk
@@ -138,19 +139,9 @@ func _physics_process(delta: float) -> void:
 	update_jump_animation(delta, was_on_floor, direction)
 
 
-func _input(event: InputEvent) -> void:
-	for action in [&"move_left", &"move_right", &"jump", &"sprint", &"block", &"attack"]:
-		if event.is_action_pressed(action):
-			print_action_debug(action)
-
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("attack") and can_start_attack():
 		start_attack()
-
-
-func print_action_debug(action: StringName) -> void:
-	print("Action performed: ", action, " | Animation: ", animated_sprite.animation)
 
 
 func update_jump_animation(delta: float, was_on_floor: bool, direction: float) -> void:
@@ -343,16 +334,28 @@ func handle_attack_damage() -> void:
 	query.transform = active_attack_collision.global_transform
 	query.collision_mask = 4
 	query.exclude = [self]
-	query.collide_with_areas = false
+	query.collide_with_areas = true
 	query.collide_with_bodies = true
 
 	for result in get_world_2d().direct_space_state.intersect_shape(query):
-		var robot := result["collider"] as Node
+		var collider := result["collider"] as Node
+		var robot := get_attack_damage_target(collider)
 		if robot == null or robot in enemies_hit_this_attack or not robot.has_method("take_damage"):
 			continue
 
 		enemies_hit_this_attack.append(robot)
 		robot.take_damage(attack_damage)
+
+
+func get_attack_damage_target(collider: Node) -> Node:
+	var current_node := collider
+	while current_node != null:
+		if current_node.has_method("take_damage"):
+			return current_node
+
+		current_node = current_node.get_parent()
+
+	return null
 
 
 func get_current_attack_collision() -> CollisionShape2D:
@@ -450,7 +453,7 @@ func apply_booster_launch(launch_velocity: Vector2) -> void:
 
 
 func take_damage(amount: int) -> void:
-	if is_dead:
+	if is_dead or god_mode_enabled:
 		return
 
 	var previous_health := health

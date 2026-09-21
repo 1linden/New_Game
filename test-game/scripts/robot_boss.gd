@@ -7,16 +7,20 @@ signal health_changed(current_health: int, maximum_health: int)
 @export var bullet_scene: PackedScene
 @export var sniper_bullet_scene: PackedScene = preload("res://scenes/bullet_heavy.tscn")
 @export var pistol_shoot_range: float = 300
-@export var pistol_shoot_cooldown_seconds: float = 1.5
+@export var pistol_shoot_cooldown_seconds: float = 1
 @export var smg_shoot_range: float = 300
-@export var smg_shoot_cooldown_seconds: float = 1.5
+@export var smg_shoot_cooldown_seconds: float = 1
 @export var smg_shots_per_burst: int = 3
 @export var smg_burst_shot_interval_seconds: float = 0.1
 @export var sniper_shoot_range: float = 770
-@export var sniper_shoot_cooldown_seconds: float = 3
-@export var sniper_initial_shoot_delay_seconds: float = 1
+@export var sniper_shoot_cooldown_seconds: float = 2.5
+@export var initial_shoot_delay_seconds: float = 1
 @export var gun_rotation_offset: float = PI
 @export var starts_facing_left: bool = true
+@export var gun_overheat_warning_seconds: float = 5.0
+@export var gun_overheat_seconds: float = 10.0
+@export var gun_overheat_cooldown_seconds: float = 5.0
+@export var gun_overheat_recovery_fade_seconds: float = 2.5
 
 var health: int
 var pistol_shoot_cooldown_remaining: float = 0.0
@@ -27,6 +31,11 @@ var sniper_shoot_cooldown_remaining: float = 0.0
 var facing_right: bool = false
 var damage_flash_tween: Tween
 var heavy_gunshot_sound: AudioStreamPlayer
+var is_dead: bool = false
+var gun_heat_seconds: float = 0.0
+var gun_overheat_cooldown_remaining: float = 0.0
+var shooting_disabled: bool = false
+var damage_disabled: bool = false
 
 var heavy_gunshot_stream: AudioStream = preload("res://assets/audio/laser_gunshot_heavy.wav")
 
@@ -42,16 +51,30 @@ var heavy_gunshot_stream: AudioStream = preload("res://assets/audio/laser_gunsho
 @onready var bullet_spawn_smg_right: Marker2D = $GunPivotRight/BulletSpawnRightSmg
 @onready var bullet_spawn_sniper_left: Marker2D = $GunPivotLeft/BulletSpawnLeftSniper
 @onready var bullet_spawn_sniper_right: Marker2D = $GunPivotRight/BulletSpawnRightSniper
+@onready var gun_left: Sprite2D = $GunPivotLeft/GunLeft
+@onready var gun_right: Sprite2D = $GunPivotRight/GunRight
+@onready var gun_hitbox_left: Area2D = $GunPivotLeft/GunHitboxLeft
+@onready var gun_hitbox_right: Area2D = $GunPivotRight/GunHitboxRight
 @onready var gunshot_sound: AudioStreamPlayer = $GunshotSound
 @onready var enemy_take_damage_sound: AudioStreamPlayer = $EnemyTakeDamageSound
 
 
 func _ready() -> void:
 	health = maximum_health
-	sniper_shoot_cooldown_remaining = sniper_initial_shoot_delay_seconds
+	pistol_shoot_cooldown_remaining = initial_shoot_delay_seconds
+	smg_shoot_cooldown_remaining = initial_shoot_delay_seconds
+	sniper_shoot_cooldown_remaining = initial_shoot_delay_seconds
+	setup_gun_hitboxes()
 	setup_heavy_gunshot_sound()
 	reset_to_starting_facing()
 	health_changed.emit(health, maximum_health)
+
+
+func setup_gun_hitboxes() -> void:
+	for gun_hitbox in [gun_hitbox_left, gun_hitbox_right]:
+		gun_hitbox.collision_layer = 4
+		gun_hitbox.collision_mask = 0
+		gun_hitbox.monitorable = true
 
 
 func _physics_process(delta: float) -> void:
@@ -121,6 +144,10 @@ func update_shooting(delta: float) -> void:
 	if not is_level_started():
 		return
 
+	if shooting_disabled:
+		cool_gun(delta)
+		return
+
 	pistol_shoot_cooldown_remaining = maxf(pistol_shoot_cooldown_remaining - delta, 0.0)
 	smg_shoot_cooldown_remaining = maxf(smg_shoot_cooldown_remaining - delta, 0.0)
 	smg_burst_shot_interval_remaining = maxf(smg_burst_shot_interval_remaining - delta, 0.0)
@@ -128,11 +155,90 @@ func update_shooting(delta: float) -> void:
 
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
+		cool_gun(delta)
+		return
+
+	update_gun_overheat(delta, player)
+	if is_gun_overheated():
 		return
 
 	update_pistol_shooting(player)
 	update_smg_shooting(player)
 	update_sniper_shooting(player)
+
+
+func update_gun_overheat(delta: float, player: Node2D) -> void:
+	if gun_overheat_cooldown_remaining > 0.0:
+		gun_overheat_cooldown_remaining = maxf(gun_overheat_cooldown_remaining - delta, 0.0)
+		if gun_overheat_cooldown_remaining == 0.0:
+			gun_heat_seconds = 0.0
+		update_gun_overheat_color()
+		return
+
+	if can_gun_build_heat(player):
+		gun_heat_seconds = minf(gun_heat_seconds + delta, gun_overheat_seconds)
+		if gun_heat_seconds >= gun_overheat_seconds:
+			gun_overheat_cooldown_remaining = gun_overheat_cooldown_seconds
+	else:
+		cool_gun(delta)
+
+	update_gun_overheat_color()
+
+
+func can_gun_build_heat(player: Node2D) -> bool:
+	var gun_pivot := get_active_gun_pivot()
+	if gun_pivot == null:
+		return false
+	if gun_pivot.global_position.distance_to(player.global_position) > maxf(sniper_shoot_range, maxf(pistol_shoot_range, smg_shoot_range)):
+		return false
+
+	return has_line_of_sight_to(player, gun_pivot.global_position)
+
+
+func cool_gun(delta: float) -> void:
+	if gun_overheat_cooldown_remaining > 0.0:
+		return
+
+	gun_heat_seconds = maxf(gun_heat_seconds - delta, 0.0)
+	update_gun_overheat_color()
+
+
+func is_gun_overheated() -> bool:
+	return gun_overheat_cooldown_remaining > 0.0
+
+
+func set_shooting_disabled(is_disabled: bool) -> void:
+	shooting_disabled = is_disabled
+	if shooting_disabled:
+		smg_burst_shots_remaining = 0
+		smg_burst_shot_interval_remaining = 0.0
+
+
+func set_damage_disabled(is_disabled: bool) -> void:
+	damage_disabled = is_disabled
+	var boss_modulate := modulate
+	boss_modulate.a = 0.3 if damage_disabled else 1.0
+	modulate = boss_modulate
+
+
+func keep_alive_during_add_wave() -> void:
+	if health > 0:
+		return
+
+	health = 1
+	health_changed.emit(health, maximum_health)
+
+
+func update_gun_overheat_color() -> void:
+	var heat_ratio := 0.0
+	if gun_overheat_cooldown_remaining > 0.0:
+		heat_ratio = 1.0 if gun_overheat_cooldown_remaining >= gun_overheat_recovery_fade_seconds else gun_overheat_cooldown_remaining / gun_overheat_recovery_fade_seconds
+	elif gun_heat_seconds > gun_overheat_warning_seconds:
+		heat_ratio = inverse_lerp(gun_overheat_warning_seconds, gun_overheat_seconds, gun_heat_seconds)
+
+	var gun_color := Color.WHITE.lerp(Color.RED, clampf(heat_ratio, 0.0, 1.0))
+	gun_left.modulate = gun_color
+	gun_right.modulate = gun_color
 
 
 func update_pistol_shooting(player: Node2D) -> void:
@@ -263,6 +369,9 @@ func is_level_started() -> bool:
 
 
 func take_damage(amount: int) -> void:
+	if damage_disabled:
+		return
+
 	var previous_health := health
 	health = max(health - amount, 0)
 	health_changed.emit(health, maximum_health)
@@ -304,5 +413,10 @@ func set_robot_modulate(color: Color) -> void:
 
 
 func die() -> void:
+	if is_dead:
+		return
+
+	is_dead = true
+	Spark.burst(global_position, "explode")
 	defeated.emit()
 	call_deferred("queue_free")
