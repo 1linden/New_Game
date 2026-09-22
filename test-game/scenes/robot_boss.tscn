@@ -5,6 +5,7 @@
 [ext_resource type="AudioStream" uid="uid://b7padyv0jbbbi" path="res://assets/audio/laser_gunshot_light.wav" id="4_st5u7"]
 [ext_resource type="AudioStream" uid="uid://cuw7hny8hcmn0" path="res://assets/audio/enemy_take_damage.wav" id="5_70mhf"]
 [ext_resource type="Texture2D" uid="uid://cu2bosqwx35n7" path="res://assets/visuals/robot_boss_gun2.png" id="6_bv1mr"]
+[ext_resource type="AudioStream" uid="uid://cm3bnr0gmwmsk" path="res://assets/audio/gun_overheat_steam.wav" id="6_op8rb"]
 [ext_resource type="PackedScene" uid="uid://ccg1ga1e4mhwf" path="res://scenes/bullet_light.tscn" id="7_boss"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
@@ -20,7 +21,7 @@ size = Vector2(45, 34)
 size = Vector2(45, 34)
 
 [node name="RobotBoss" type="CharacterBody2D" unique_id=3519924]
-collision_layer = 4
+collision_layer = 32
 script = ExtResource("1_boss")
 bullet_scene = ExtResource("7_boss")
 
@@ -53,6 +54,18 @@ volume_db = -5.0
 
 [node name="EnemyTakeDamageSound" type="AudioStreamPlayer" parent="." unique_id=735049282]
 stream = ExtResource("5_70mhf")
+
+[node name="GunOverheatSteamSound" type="AudioStreamPlayer" parent="." unique_id=1129621353]
+stream = ExtResource("6_op8rb")
+volume_db = -10.0
+
+[node name="GunOverheatBar" type="ProgressBar" parent="." unique_id=1358072934]
+offset_left = -27.0
+offset_top = -52.0
+offset_right = 37.0
+offset_bottom = -44.0
+mouse_filter = 2
+show_percentage = false
 
 [node name="GunPivotLeft" type="Node2D" parent="." unique_id=1070630540]
 position = Vector2(-16, -14)

@@ -2,6 +2,7 @@ extends Node2D
 
 const START_LEVEL_ACTIONS := [&"move_left", &"move_right", &"jump", &"sprint", &"block", &"attack"]
 const FADE_SECONDS := 0.4
+const BOSS_MINION_INITIAL_SHOOT_DELAY_SECONDS := 1.5
 const BUTTON_SCENE: PackedScene = preload("res://scenes/button.tscn")
 const TUTORIAL_TEXTS: Array[String] = [
 	"Press A to Move Left and D to Move Right",
@@ -458,6 +459,7 @@ func spawn_boss_minion_wave() -> void:
 		spawned_boss_minions.append(boss_minion)
 		connect_boss_minion_signals(boss_minion)
 		set_enemy_active(boss_minion, true)
+		delay_boss_minion_shooting(boss_minion)
 
 	boss_minions = spawned_boss_minions
 
@@ -491,6 +493,12 @@ func create_boss_minion_from_spawn_data(spawn_data: Dictionary) -> Node:
 func connect_boss_minion_signals(boss_minion: Node) -> void:
 	if boss_minion.has_signal("defeated") and not boss_minion.defeated.is_connected(_on_enemy_defeated):
 		boss_minion.defeated.connect(_on_enemy_defeated)
+
+
+func delay_boss_minion_shooting(boss_minion: Node) -> void:
+	boss_minion.set("shoot_cooldown_remaining", BOSS_MINION_INITIAL_SHOOT_DELAY_SECONDS)
+	boss_minion.set("burst_shots_remaining", 0)
+	boss_minion.set("burst_shot_interval_remaining", 0.0)
 
 
 func set_boss_shooting_disabled(is_disabled: bool) -> void:

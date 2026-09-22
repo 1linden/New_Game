@@ -34,8 +34,10 @@ var heavy_gunshot_sound: AudioStreamPlayer
 var is_dead: bool = false
 var gun_heat_seconds: float = 0.0
 var gun_overheat_cooldown_remaining: float = 0.0
+var gun_heat_increasing: bool = false
 var shooting_disabled: bool = false
 var damage_disabled: bool = false
+var gun_overheat_bar_fill_style := StyleBoxFlat.new()
 
 var heavy_gunshot_stream: AudioStream = preload("res://assets/audio/laser_gunshot_heavy.wav")
 
@@ -57,14 +59,15 @@ var heavy_gunshot_stream: AudioStream = preload("res://assets/audio/laser_gunsho
 @onready var gun_hitbox_right: Area2D = $GunPivotRight/GunHitboxRight
 @onready var gunshot_sound: AudioStreamPlayer = $GunshotSound
 @onready var enemy_take_damage_sound: AudioStreamPlayer = $EnemyTakeDamageSound
+@onready var gun_overheat_steam_sound: AudioStreamPlayer = $GunOverheatSteamSound
+@onready var gun_overheat_bar: ProgressBar = get_node_or_null("GunOverheatBar") as ProgressBar
 
 
 func _ready() -> void:
 	health = maximum_health
-	pistol_shoot_cooldown_remaining = initial_shoot_delay_seconds
-	smg_shoot_cooldown_remaining = initial_shoot_delay_seconds
-	sniper_shoot_cooldown_remaining = initial_shoot_delay_seconds
+	apply_initial_shoot_delay()
 	setup_gun_hitboxes()
+	setup_gun_overheat_bar()
 	setup_heavy_gunshot_sound()
 	reset_to_starting_facing()
 	health_changed.emit(health, maximum_health)
@@ -169,16 +172,19 @@ func update_shooting(delta: float) -> void:
 
 func update_gun_overheat(delta: float, player: Node2D) -> void:
 	if gun_overheat_cooldown_remaining > 0.0:
+		gun_heat_increasing = false
 		gun_overheat_cooldown_remaining = maxf(gun_overheat_cooldown_remaining - delta, 0.0)
 		if gun_overheat_cooldown_remaining == 0.0:
-			gun_heat_seconds = 0.0
+			finish_gun_overheat_cooldown()
 		update_gun_overheat_color()
 		return
 
 	if can_gun_build_heat(player):
+		gun_heat_increasing = true
 		gun_heat_seconds = minf(gun_heat_seconds + delta, gun_overheat_seconds)
 		if gun_heat_seconds >= gun_overheat_seconds:
 			gun_overheat_cooldown_remaining = gun_overheat_cooldown_seconds
+			gun_overheat_steam_sound.play()
 	else:
 		cool_gun(delta)
 
@@ -196,11 +202,29 @@ func can_gun_build_heat(player: Node2D) -> bool:
 
 
 func cool_gun(delta: float) -> void:
+	gun_heat_increasing = false
 	if gun_overheat_cooldown_remaining > 0.0:
+		gun_overheat_cooldown_remaining = maxf(gun_overheat_cooldown_remaining - delta, 0.0)
+		if gun_overheat_cooldown_remaining == 0.0:
+			finish_gun_overheat_cooldown()
+		update_gun_overheat_color()
 		return
 
 	gun_heat_seconds = maxf(gun_heat_seconds - delta, 0.0)
 	update_gun_overheat_color()
+
+
+func finish_gun_overheat_cooldown() -> void:
+	gun_heat_seconds = 0.0
+	apply_initial_shoot_delay()
+
+
+func apply_initial_shoot_delay() -> void:
+	pistol_shoot_cooldown_remaining = initial_shoot_delay_seconds
+	smg_shoot_cooldown_remaining = initial_shoot_delay_seconds
+	smg_burst_shots_remaining = 0
+	smg_burst_shot_interval_remaining = 0.0
+	sniper_shoot_cooldown_remaining = initial_shoot_delay_seconds
 
 
 func is_gun_overheated() -> bool:
@@ -239,6 +263,64 @@ func update_gun_overheat_color() -> void:
 	var gun_color := Color.WHITE.lerp(Color.RED, clampf(heat_ratio, 0.0, 1.0))
 	gun_left.modulate = gun_color
 	gun_right.modulate = gun_color
+	update_gun_overheat_bar()
+
+
+func setup_gun_overheat_bar() -> void:
+	if gun_overheat_bar == null:
+		return
+
+	var background_style := StyleBoxFlat.new()
+	background_style.bg_color = Color(0, 0, 0, 0.65)
+	gun_overheat_bar_fill_style.bg_color = Color.GRAY
+	gun_overheat_bar.add_theme_stylebox_override("background", background_style)
+	gun_overheat_bar.add_theme_stylebox_override("fill", gun_overheat_bar_fill_style)
+	gun_overheat_bar.min_value = 0.0
+	gun_overheat_bar.max_value = 100.0
+	gun_overheat_bar.show_percentage = false
+	update_gun_overheat_bar()
+
+
+func update_gun_overheat_bar() -> void:
+	if gun_overheat_bar == null:
+		return
+
+	var bar_ratio := get_gun_overheat_bar_ratio()
+	gun_overheat_bar.visible = bar_ratio > 0.0 and is_gun_overheat_bar_flash_visible()
+	gun_overheat_bar.value = bar_ratio * gun_overheat_bar.max_value
+	gun_overheat_bar_fill_style.bg_color = get_gun_overheat_bar_color(bar_ratio)
+
+
+func get_gun_overheat_bar_ratio() -> float:
+	if gun_overheat_cooldown_remaining > gun_overheat_recovery_fade_seconds:
+		return 1.0
+	if gun_overheat_cooldown_remaining > 0.0:
+		return clampf(gun_overheat_cooldown_remaining / gun_overheat_recovery_fade_seconds, 0.0, 1.0)
+	if gun_overheat_seconds <= gun_overheat_warning_seconds:
+		return 0.0
+
+	return clampf(inverse_lerp(gun_overheat_warning_seconds, gun_overheat_seconds, gun_heat_seconds), 0.0, 1.0)
+
+
+func get_gun_overheat_bar_color(bar_ratio: float) -> Color:
+	return Color.GRAY.lerp(Color.RED, bar_ratio)
+
+
+func is_gun_overheat_bar_flash_visible() -> bool:
+	if gun_overheat_cooldown_remaining > 0.0:
+		return true
+	if not gun_heat_increasing:
+		return true
+
+	var warning_elapsed := gun_heat_seconds - gun_overheat_warning_seconds
+	if warning_elapsed < 2.0:
+		return true
+
+	var flash_seconds := 0.5
+	if warning_elapsed >= 3.5:
+		flash_seconds = 0.25
+
+	return fmod(warning_elapsed - 2.0, flash_seconds) < flash_seconds * 0.5
 
 
 func update_pistol_shooting(player: Node2D) -> void:

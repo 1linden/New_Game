@@ -82,35 +82,35 @@ shape = SubResource("RectangleShape2D_ck2xc")
 [node name="Surfaces" type="Node2D" parent="." unique_id=805343588]
 
 [node name="PlatformLeft1" parent="Surfaces" unique_id=700026687 instance=ExtResource("3_a50we")]
-position = Vector2(284, 207.00002)
-scale = Vector2(0.9, 0.665)
+position = Vector2(297, 207.00002)
+scale = Vector2(0.8, 0.665)
 
 [node name="PlatformLeft2" parent="Surfaces" unique_id=1665421905 instance=ExtResource("3_a50we")]
 position = Vector2(517, 207.00002)
 scale = Vector2(1.008, 0.665)
 
 [node name="PlatformRight1" parent="Surfaces" unique_id=2131130164 instance=ExtResource("3_a50we")]
-position = Vector2(996.00006, 207)
-scale = Vector2(0.9, 0.665)
+position = Vector2(983.00006, 207.00002)
+scale = Vector2(0.8, 0.665)
 
 [node name="PlatformRight2" parent="Surfaces" unique_id=1529634004 instance=ExtResource("3_a50we")]
 position = Vector2(762.99994, 207.00002)
 scale = Vector2(1.008, 0.665)
 
 [node name="WallLeft1" parent="Surfaces" unique_id=682897876 instance=ExtResource("4_inh47")]
-position = Vector2(194, 451.00003)
+position = Vector2(219, 451.00003)
 scale = Vector2(1, 0.665)
 
 [node name="WallLeft2" parent="Surfaces" unique_id=1350774806 instance=ExtResource("4_inh47")]
-position = Vector2(194, 295)
+position = Vector2(219, 295)
 scale = Vector2(1, 0.665)
 
 [node name="WallRight1" parent="Surfaces" unique_id=973106136 instance=ExtResource("4_inh47")]
-position = Vector2(1086, 451.00003)
+position = Vector2(1061, 451.00003)
 scale = Vector2(1, 0.665)
 
 [node name="WallRight2" parent="Surfaces" unique_id=1205207668 instance=ExtResource("4_inh47")]
-position = Vector2(1086, 295)
+position = Vector2(1061, 295)
 scale = Vector2(1, 0.665)
 
 [node name="Enemies" type="Node2D" parent="." unique_id=694008477]
@@ -118,26 +118,29 @@ scale = Vector2(1, 0.665)
 [node name="RobotBoss" parent="Enemies" unique_id=3519924 instance=ExtResource("5_01mlm")]
 position = Vector2(620, 490)
 scale = Vector2(4, 4)
-collision_layer = 36
-maximum_health = 100
+maximum_health = 200
 pistol_shoot_range = 1000.0
 smg_shoot_range = 1000.0
 sniper_shoot_range = 1000.0
 
 [node name="RobotSniper" parent="Enemies" unique_id=1839615594 instance=ExtResource("6_frcq8")]
-position = Vector2(289, 154)
+visible = false
+position = Vector2(295, 154)
 
 [node name="RobotSniper2" parent="Enemies" unique_id=246525871 instance=ExtResource("6_frcq8")]
-position = Vector2(992, 154)
+visible = false
+position = Vector2(973, 154)
 
 [node name="RobotPistol" parent="Enemies" unique_id=1001928399 instance=ExtResource("7_t3bll")]
-position = Vector2(367.45697, 616.65295)
+visible = false
+position = Vector2(253, 616)
 
 [node name="RobotPistol2" parent="Enemies" unique_id=1551294909 instance=ExtResource("7_t3bll")]
-position = Vector2(982, 614)
+visible = false
+position = Vector2(1016, 616)
 
 [node name="Player" parent="." unique_id=1662097633 instance=ExtResource("8_l2vy3")]
-position = Vector2(259, 600)
+position = Vector2(227.99998, 138)
 scale = Vector2(0.3809488, 0.3809488)
 
 [node name="BoosterPadLeft" parent="." unique_id=1033171433 instance=ExtResource("7_i1ncm")]

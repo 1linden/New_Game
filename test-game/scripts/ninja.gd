@@ -5,6 +5,9 @@ signal player_died
 
 enum BlockWalkState { NONE, ENTERING, WALKING, EXITING, EXITING_TO_WALK }
 
+const SWORD_COLLISION_LAYER := 64
+const SWORD_COLLISION_MASK := 4
+
 @export var movement_speed: float = 250.0
 @export var sprint_multiplier: float = 1.5
 @export var jump_velocity: float = -600.0
@@ -56,6 +59,19 @@ var god_mode_enabled: bool = false
 @onready var collision_attack_3_flipped: CollisionShape2D = $CollisionAttack3Flipped
 @onready var collision_attack_4_flipped: CollisionShape2D = $CollisionAttack4Flipped
 @onready var collision_attack_5_flipped: CollisionShape2D = $CollisionAttack5Flipped
+@onready var sword: Area2D = $Sword
+@onready var collision_sword_attack_0: CollisionShape2D = $Sword/CollisionSwordAttack0
+@onready var collision_sword_attack_1: CollisionShape2D = $Sword/CollisionSwordAttack1
+@onready var collision_sword_attack_2: CollisionShape2D = $Sword/CollisionSwordAttack2
+@onready var collision_sword_attack_3: CollisionShape2D = $Sword/CollisionSwordAttack3
+@onready var collision_sword_attack_4: CollisionShape2D = $Sword/CollisionSwordAttack4
+@onready var collision_sword_attack_5: CollisionShape2D = $Sword/CollisionSwordAttack5
+@onready var collision_sword_attack_0_flipped: CollisionShape2D = $Sword/CollisionSwordAttack0Flipped
+@onready var collision_sword_attack_1_flipped: CollisionShape2D = $Sword/CollisionSwordAttack1Flipped
+@onready var collision_sword_attack_2_flipped: CollisionShape2D = $Sword/CollisionSwordAttack2Flipped
+@onready var collision_sword_attack_3_flipped: CollisionShape2D = $Sword/CollisionSwordAttack3Flipped
+@onready var collision_sword_attack_4_flipped: CollisionShape2D = $Sword/CollisionSwordAttack4Flipped
+@onready var collision_sword_attack_5_flipped: CollisionShape2D = $Sword/CollisionSwordAttack5Flipped
 @onready var take_damage_sound: AudioStreamPlayer = $TakeDamageSound
 @onready var attack_sound: AudioStreamPlayer = $AttackSound
 
@@ -66,6 +82,7 @@ func _ready() -> void:
 	if animated_sprite.sprite_frames.has_animation(&"BlockWalkTransition"):
 		animated_sprite.sprite_frames.set_animation_loop(&"BlockWalkTransition", false)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
+	setup_sword_hitbox()
 	play_standing_animation()
 
 
@@ -320,19 +337,20 @@ func can_start_attack() -> bool:
 
 
 func play_attack_animation() -> void:
-	use_attack_collision(get_current_attack_collision())
+	use_attack_collision()
 	if animated_sprite.animation != &"Attack":
 		animated_sprite.play(&"Attack")
 
 
 func handle_attack_damage() -> void:
-	var active_attack_collision := get_current_attack_collision()
-	use_attack_collision(active_attack_collision)
+	use_attack_collision()
+	var active_sword_collision := get_current_sword_collision()
+	set_sword_collision_shape(active_sword_collision)
 
 	var query := PhysicsShapeQueryParameters2D.new()
-	query.shape = active_attack_collision.shape
-	query.transform = active_attack_collision.global_transform
-	query.collision_mask = 4
+	query.shape = active_sword_collision.shape
+	query.transform = active_sword_collision.global_transform
+	query.collision_mask = SWORD_COLLISION_MASK
 	query.exclude = [self]
 	query.collide_with_areas = true
 	query.collide_with_bodies = true
@@ -374,6 +392,22 @@ func get_current_attack_collision() -> CollisionShape2D:
 			return get_facing_collision(collision_attack_5, collision_attack_5_flipped)
 
 
+func get_current_sword_collision() -> CollisionShape2D:
+	match animated_sprite.frame:
+		0:
+			return get_facing_collision(collision_sword_attack_0, collision_sword_attack_0_flipped)
+		1:
+			return get_facing_collision(collision_sword_attack_1, collision_sword_attack_1_flipped)
+		2:
+			return get_facing_collision(collision_sword_attack_2, collision_sword_attack_2_flipped)
+		3:
+			return get_facing_collision(collision_sword_attack_3, collision_sword_attack_3_flipped)
+		4:
+			return get_facing_collision(collision_sword_attack_4, collision_sword_attack_4_flipped)
+		_:
+			return get_facing_collision(collision_sword_attack_5, collision_sword_attack_5_flipped)
+
+
 func use_walk_collision() -> void:
 	set_collision_shape(get_facing_collision(collision_walk, collision_walk_flipped))
 
@@ -402,8 +436,8 @@ func use_block_walk_collision() -> void:
 	set_collision_shape(get_facing_collision(collision_block_walk, collision_block_walk_flipped))
 
 
-func use_attack_collision(active_shape: CollisionShape2D) -> void:
-	set_collision_shape(active_shape)
+func use_attack_collision() -> void:
+	set_collision_shape(get_facing_collision(collision_standing, collision_standing_flipped))
 
 
 func get_facing_collision(normal_shape: CollisionShape2D, flipped_shape: CollisionShape2D) -> CollisionShape2D:
@@ -437,6 +471,44 @@ func set_collision_shape(active_shape: CollisionShape2D) -> void:
 	collision_attack_3_flipped.disabled = active_shape != collision_attack_3_flipped
 	collision_attack_4_flipped.disabled = active_shape != collision_attack_4_flipped
 	collision_attack_5_flipped.disabled = active_shape != collision_attack_5_flipped
+
+
+func setup_sword_hitbox() -> void:
+	sword.collision_layer = SWORD_COLLISION_LAYER
+	sword.collision_mask = SWORD_COLLISION_MASK
+	sword.monitoring = true
+	sword.monitorable = true
+	disable_sword_collisions()
+
+
+func set_sword_collision_shape(active_shape: CollisionShape2D) -> void:
+	collision_sword_attack_0.disabled = active_shape != collision_sword_attack_0
+	collision_sword_attack_1.disabled = active_shape != collision_sword_attack_1
+	collision_sword_attack_2.disabled = active_shape != collision_sword_attack_2
+	collision_sword_attack_3.disabled = active_shape != collision_sword_attack_3
+	collision_sword_attack_4.disabled = active_shape != collision_sword_attack_4
+	collision_sword_attack_5.disabled = active_shape != collision_sword_attack_5
+	collision_sword_attack_0_flipped.disabled = active_shape != collision_sword_attack_0_flipped
+	collision_sword_attack_1_flipped.disabled = active_shape != collision_sword_attack_1_flipped
+	collision_sword_attack_2_flipped.disabled = active_shape != collision_sword_attack_2_flipped
+	collision_sword_attack_3_flipped.disabled = active_shape != collision_sword_attack_3_flipped
+	collision_sword_attack_4_flipped.disabled = active_shape != collision_sword_attack_4_flipped
+	collision_sword_attack_5_flipped.disabled = active_shape != collision_sword_attack_5_flipped
+
+
+func disable_sword_collisions() -> void:
+	collision_sword_attack_0.disabled = true
+	collision_sword_attack_1.disabled = true
+	collision_sword_attack_2.disabled = true
+	collision_sword_attack_3.disabled = true
+	collision_sword_attack_4.disabled = true
+	collision_sword_attack_5.disabled = true
+	collision_sword_attack_0_flipped.disabled = true
+	collision_sword_attack_1_flipped.disabled = true
+	collision_sword_attack_2_flipped.disabled = true
+	collision_sword_attack_3_flipped.disabled = true
+	collision_sword_attack_4_flipped.disabled = true
+	collision_sword_attack_5_flipped.disabled = true
 
 
 func take_bullet_damage(amount: int, bullet_direction: Vector2) -> void:
@@ -503,6 +575,7 @@ func _on_animation_finished() -> void:
 	if animated_sprite.animation == &"Attack" and is_attacking:
 		is_attacking = false
 		enemies_hit_this_attack.clear()
+		disable_sword_collisions()
 		return
 
 	if animated_sprite.animation == &"BlockWalkTransition":
