@@ -209,6 +209,10 @@ func run_command(command_text: String) -> void:
 		toggle_god_mode()
 		return
 
+	if parts.size() == 2 and parts[0] == "kill" and parts[1] == "boss":
+		kill_boss()
+		return
+
 	message_label.text = "Unknown command"
 	input_line.text = ""
 	refocus_input_line()
@@ -243,6 +247,20 @@ func toggle_god_mode() -> void:
 	refocus_input_line()
 
 
+func kill_boss() -> void:
+	var boss := get_current_boss()
+	if boss == null:
+		show_command_error("Boss not found")
+		return
+
+	hide_console()
+	get_tree().paused = false
+	if boss.has_method("force_kill_for_debug"):
+		boss.force_kill_for_debug()
+	elif boss.has_method("take_damage"):
+		boss.take_damage(999999)
+
+
 func apply_god_mode_to_current_player() -> void:
 	var player := get_current_player()
 	if player == null:
@@ -265,6 +283,20 @@ func get_current_player() -> Node:
 		return player
 
 	return get_tree().get_first_node_in_group("player")
+
+
+func get_current_boss() -> Node:
+	var current_scene := get_tree().current_scene
+	if current_scene == null:
+		return null
+
+	var enemies := current_scene.get_node_or_null("Enemies")
+	if enemies != null:
+		var boss := enemies.get_node_or_null("RobotBoss")
+		if boss != null:
+			return boss
+
+	return current_scene.find_child("RobotBoss", true, false)
 
 
 func show_command_error(error_text: String) -> void:

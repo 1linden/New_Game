@@ -236,19 +236,19 @@ theme_override_constants/separation = 12
 [node name="ResumeButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=921503771 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Resume"
 
 [node name="RestartButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=1285877113 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Restart"
 
 [node name="MainMenuButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=1377104583 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Main Menu"
 
 [node name="DeathOverlay" type="ColorRect" parent="Interface" unique_id=56823442]
@@ -304,6 +304,6 @@ vertical_alignment = 1
 [node name="RestartButton" parent="Interface/DeathOverlay/DeathPanel/Options" unique_id=835879924 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Restart Level"
 

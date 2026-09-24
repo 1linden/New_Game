@@ -3,22 +3,22 @@ extends CharacterBody2D
 signal defeated
 signal health_changed(current_health: int, maximum_health: int)
 
-@export var maximum_health: int = 1000
+@export var maximum_health: int = 1500
 @export var bullet_scene: PackedScene
 @export var sniper_bullet_scene: PackedScene = preload("res://scenes/bullet_heavy.tscn")
-@export var pistol_shoot_range: float = 300
+@export var pistol_shoot_range: float = 1000
 @export var pistol_shoot_cooldown_seconds: float = 1
-@export var smg_shoot_range: float = 300
+@export var smg_shoot_range: float = 1000
 @export var smg_shoot_cooldown_seconds: float = 1
 @export var smg_shots_per_burst: int = 3
 @export var smg_burst_shot_interval_seconds: float = 0.1
-@export var sniper_shoot_range: float = 770
+@export var sniper_shoot_range: float = 1000
 @export var sniper_shoot_cooldown_seconds: float = 2.5
 @export var initial_shoot_delay_seconds: float = 1
 @export var gun_rotation_offset: float = PI
 @export var starts_facing_left: bool = true
-@export var gun_overheat_warning_seconds: float = 5.0
-@export var gun_overheat_seconds: float = 10.0
+@export var gun_overheat_warning_seconds: float = 2.5
+@export var gun_overheat_seconds: float = 7.5
 @export var gun_overheat_cooldown_seconds: float = 5.0
 @export var gun_overheat_recovery_fade_seconds: float = 2.5
 
@@ -30,21 +30,19 @@ var smg_burst_shot_interval_remaining: float = 0.0
 var sniper_shoot_cooldown_remaining: float = 0.0
 var facing_right: bool = false
 var damage_flash_tween: Tween
-var heavy_gunshot_sound: AudioStreamPlayer
 var is_dead: bool = false
 var gun_heat_seconds: float = 0.0
 var gun_overheat_cooldown_remaining: float = 0.0
 var gun_heat_increasing: bool = false
 var shooting_disabled: bool = false
 var damage_disabled: bool = false
+var has_acquired_player_line_of_sight: bool = false
 var gun_overheat_bar_fill_style := StyleBoxFlat.new()
-
-var heavy_gunshot_stream: AudioStream = preload("res://assets/audio/laser_gunshot_heavy.wav")
 
 @onready var robot_left: Sprite2D = find_optional_node("RobotLeft", "Sprite2DLeft") as Sprite2D
 @onready var robot_right: Sprite2D = find_optional_node("RobotRight", "Sprite2DRight") as Sprite2D
-@onready var collision_left: CollisionShape2D = get_node_or_null("CollisionLeft") as CollisionShape2D
-@onready var collision_right: CollisionShape2D = get_node_or_null("CollisionRight") as CollisionShape2D
+@onready var collision_left: CollisionPolygon2D = get_node_or_null("CollisionLeft") as CollisionPolygon2D
+@onready var collision_right: CollisionPolygon2D = get_node_or_null("CollisionRight") as CollisionPolygon2D
 @onready var gun_pivot_left: Node2D = $GunPivotLeft
 @onready var gun_pivot_right: Node2D = $GunPivotRight
 @onready var bullet_spawn_pistol_left: Marker2D = $GunPivotLeft/BulletSpawnLeftPistol
@@ -57,18 +55,21 @@ var heavy_gunshot_stream: AudioStream = preload("res://assets/audio/laser_gunsho
 @onready var gun_right: Sprite2D = $GunPivotRight/GunRight
 @onready var gun_hitbox_left: Area2D = $GunPivotLeft/GunHitboxLeft
 @onready var gun_hitbox_right: Area2D = $GunPivotRight/GunHitboxRight
-@onready var gunshot_sound: AudioStreamPlayer = $GunshotSound
+@onready var gun_overheat_steam_particles_left: GPUParticles2D = $GunPivotLeft/SteamParticlesLeft
+@onready var gun_overheat_steam_particles_right: GPUParticles2D = $GunPivotRight/SteamParticlesRight
+@onready var light_gunshot_sound: AudioStreamPlayer = $LightGunshotSound
+@onready var heavy_gunshot_sound: AudioStreamPlayer = $HeavyGunshotSound
 @onready var enemy_take_damage_sound: AudioStreamPlayer = $EnemyTakeDamageSound
+@onready var explosion_sound: AudioStreamPlayer = $ExplosionSound
 @onready var gun_overheat_steam_sound: AudioStreamPlayer = $GunOverheatSteamSound
 @onready var gun_overheat_bar: ProgressBar = get_node_or_null("GunOverheatBar") as ProgressBar
 
 
 func _ready() -> void:
 	health = maximum_health
-	apply_initial_shoot_delay()
 	setup_gun_hitboxes()
 	setup_gun_overheat_bar()
-	setup_heavy_gunshot_sound()
+	setup_gun_overheat_steam_particles()
 	reset_to_starting_facing()
 	health_changed.emit(health, maximum_health)
 
@@ -80,7 +81,16 @@ func setup_gun_hitboxes() -> void:
 		gun_hitbox.monitorable = true
 
 
+func setup_gun_overheat_steam_particles() -> void:
+	for particles in [gun_overheat_steam_particles_left, gun_overheat_steam_particles_right]:
+		particles.one_shot = true
+		particles.emitting = false
+
+
 func _physics_process(delta: float) -> void:
+	if is_dead:
+		return
+
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -89,20 +99,24 @@ func _physics_process(delta: float) -> void:
 	update_shooting(delta)
 
 
-func setup_heavy_gunshot_sound() -> void:
-	heavy_gunshot_sound = AudioStreamPlayer.new()
-	heavy_gunshot_sound.name = "HeavyGunshotSound"
-	heavy_gunshot_sound.stream = heavy_gunshot_stream
-	heavy_gunshot_sound.volume_db = gunshot_sound.volume_db
-	add_child(heavy_gunshot_sound)
-
-
 func face_player() -> void:
+	if damage_disabled:
+		return
+
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
 
 	if is_player_in_any_shoot_range(player):
+		if not has_acquired_player_line_of_sight:
+			if has_line_of_sight_to(player, global_position):
+				has_acquired_player_line_of_sight = true
+				apply_initial_shoot_delay()
+			else:
+				reset_to_starting_facing()
+				reset_active_gun_rotations()
+				return
+
 		facing_right = player.global_position.x > global_position.x
 		update_facing(facing_right)
 		aim_all_guns_at(player.global_position)
@@ -185,6 +199,7 @@ func update_gun_overheat(delta: float, player: Node2D) -> void:
 		if gun_heat_seconds >= gun_overheat_seconds:
 			gun_overheat_cooldown_remaining = gun_overheat_cooldown_seconds
 			gun_overheat_steam_sound.play()
+			emit_gun_overheat_steam()
 	else:
 		cool_gun(delta)
 
@@ -227,15 +242,31 @@ func apply_initial_shoot_delay() -> void:
 	sniper_shoot_cooldown_remaining = initial_shoot_delay_seconds
 
 
+func emit_gun_overheat_steam() -> void:
+	var template_particles := gun_overheat_steam_particles_right if facing_right else gun_overheat_steam_particles_left
+	var steam_transform := template_particles.global_transform
+	var steam_particles := template_particles.duplicate() as GPUParticles2D
+	get_tree().current_scene.add_child(steam_particles)
+	steam_particles.global_transform = steam_transform
+	steam_particles.one_shot = true
+	steam_particles.emitting = false
+	steam_particles.finished.connect(steam_particles.queue_free)
+	steam_particles.restart()
+	steam_particles.emitting = true
+
+
 func is_gun_overheated() -> bool:
 	return gun_overheat_cooldown_remaining > 0.0
 
 
 func set_shooting_disabled(is_disabled: bool) -> void:
+	var was_shooting_disabled := shooting_disabled
 	shooting_disabled = is_disabled
 	if shooting_disabled:
 		smg_burst_shots_remaining = 0
 		smg_burst_shot_interval_remaining = 0.0
+	elif was_shooting_disabled:
+		apply_initial_shoot_delay()
 
 
 func set_damage_disabled(is_disabled: bool) -> void:
@@ -284,6 +315,9 @@ func setup_gun_overheat_bar() -> void:
 func update_gun_overheat_bar() -> void:
 	if gun_overheat_bar == null:
 		return
+	if is_dead:
+		gun_overheat_bar.visible = false
+		return
 
 	var bar_ratio := get_gun_overheat_bar_ratio()
 	gun_overheat_bar.visible = bar_ratio > 0.0 and is_gun_overheat_bar_flash_visible()
@@ -313,14 +347,14 @@ func is_gun_overheat_bar_flash_visible() -> bool:
 		return true
 
 	var warning_elapsed := gun_heat_seconds - gun_overheat_warning_seconds
-	if warning_elapsed < 2.0:
+	if warning_elapsed < 3.0:
 		return true
 
-	var flash_seconds := 0.5
-	if warning_elapsed >= 3.5:
+	var flash_seconds := 0.33
+	if warning_elapsed >= 4.0:
 		flash_seconds = 0.25
 
-	return fmod(warning_elapsed - 2.0, flash_seconds) < flash_seconds * 0.5
+	return fmod(warning_elapsed - 3.0, flash_seconds) < flash_seconds * 0.5
 
 
 func update_pistol_shooting(player: Node2D) -> void:
@@ -329,7 +363,7 @@ func update_pistol_shooting(player: Node2D) -> void:
 	if not can_weapon_shoot(player, get_active_gun_pivot(), pistol_shoot_range):
 		return
 
-	shoot_weapon(player.global_position, bullet_scene, get_active_gun_pivot(), get_active_pistol_spawn(), 1, gunshot_sound)
+	shoot_weapon(player.global_position, bullet_scene, get_active_gun_pivot(), get_active_pistol_spawn(), 1, light_gunshot_sound)
 	pistol_shoot_cooldown_remaining = pistol_shoot_cooldown_seconds
 
 
@@ -348,7 +382,7 @@ func update_smg_shooting(player: Node2D) -> void:
 	if smg_burst_shot_interval_remaining > 0.0:
 		return
 
-	shoot_weapon(player.global_position, bullet_scene, get_active_gun_pivot(), get_active_smg_spawn(), 1, gunshot_sound)
+	shoot_weapon(player.global_position, bullet_scene, get_active_gun_pivot(), get_active_smg_spawn(), 1, light_gunshot_sound)
 	smg_burst_shots_remaining -= 1
 
 	if smg_burst_shots_remaining > 0:
@@ -494,11 +528,83 @@ func set_robot_modulate(color: Color) -> void:
 		robot_right.modulate = color
 
 
+func freeze_for_death_explosion() -> void:
+	velocity = Vector2.ZERO
+	shooting_disabled = true
+	smg_burst_shots_remaining = 0
+	smg_burst_shot_interval_remaining = 0.0
+	gun_heat_seconds = 0.0
+	gun_overheat_cooldown_remaining = 0.0
+	gun_heat_increasing = false
+	if gun_overheat_steam_sound != null:
+		gun_overheat_steam_sound.stop()
+	if gun_left != null:
+		gun_left.modulate = Color.WHITE
+	if gun_right != null:
+		gun_right.modulate = Color.WHITE
+	if gun_overheat_bar != null:
+		gun_overheat_bar.visible = false
+
+
+func boss_explosion_sequence() -> void:
+	# Several smaller explosions
+	for i in range(10):
+		var offset := Vector2(
+			randf_range(-120, 120),
+			randf_range(-100, 100)
+		)
+
+		Spark.burst(global_position + offset, "explode")
+		play_detached_explosion_sound()
+
+		await get_tree().create_timer(0.3).timeout
+
+	await get_tree().create_timer(0.7).timeout
+
+	# Large final explosion
+	Spark.burst(global_position, {
+		"amount": 90,
+		"color": Color(1.0, 0.85, 0.25),
+		"color2": Color(1.0, 0.05, 0.0, 0),
+		"speed": 650.0,
+		"lifetime": 1.0,
+		"size": 10.0,
+		"gravity": 180.0,
+		"spread": TAU,
+		"damping": 2.0,
+	})
+	play_detached_explosion_sound()
+
+
+func play_detached_explosion_sound() -> void:
+	if explosion_sound == null or explosion_sound.stream == null:
+		return
+
+	var sound := AudioStreamPlayer.new()
+	sound.stream = explosion_sound.stream
+	sound.volume_db = explosion_sound.volume_db
+	sound.pitch_scale = explosion_sound.pitch_scale
+	sound.bus = explosion_sound.bus
+	get_tree().current_scene.add_child(sound)
+	sound.finished.connect(sound.queue_free)
+	sound.play()
+
+
+func force_kill_for_debug() -> void:
+	if is_dead:
+		return
+
+	health = 0
+	health_changed.emit(health, maximum_health)
+	die()
+
+
 func die() -> void:
 	if is_dead:
 		return
 
 	is_dead = true
-	Spark.burst(global_position, "explode")
+	freeze_for_death_explosion()
+	await boss_explosion_sequence()
 	defeated.emit()
 	call_deferred("queue_free")

@@ -3,6 +3,17 @@ extends Node2D
 const START_LEVEL_ACTIONS := [&"move_left", &"move_right", &"jump", &"sprint", &"block", &"attack"]
 const FADE_SECONDS := 0.4
 const BOSS_MINION_INITIAL_SHOOT_DELAY_SECONDS := 1.5
+const BOSS_MINION_SPAWN_FADE_SECONDS := 0.4
+const BOSS_LASER_CHARGE_SECONDS := 2.5
+const BOSS_LASER_FIRE_SECONDS := 1
+const BOSS_LASER_START_WIDTH := 5.0
+const BOSS_LASER_END_WIDTH := 20.0
+const BOSS_LASER_CORE_WIDTH_RATIO := 0.2
+const BOSS_LASER_CORE_START_ALPHA := 0.1
+const BOSS_LASER_CORE_END_ALPHA := 0.7
+const BOSS_LASER_DAMAGE := 3
+const BOSS_LASER_COLLISION_MASK := 2
+const BOSS_LASER_BLAST_Y_POSITIONS: Array[float] = [605.0, 145.0]
 const BUTTON_SCENE: PackedScene = preload("res://scenes/button.tscn")
 const TUTORIAL_TEXTS: Array[String] = [
 	"Press A to Move Left and D to Move Right",
@@ -15,13 +26,19 @@ const TUTORIAL_TEXTS: Array[String] = [
 
 @export var completion_scene_path: String = ""
 @export var reveal_completion_items_after_enemies_defeated: bool = false
-@export_range(0.0, 1.0, 0.01) var boss_minions_spawn_at_health_ratio: float = 0.0
 @export var boss_minions_spawn_health_threshold: Array[float] = []
+@export var boss_laser_health_threshold: Array[float] = []
 
 @onready var player = $Player
 @onready var enemies: Node2D = get_node_or_null("Enemies") as Node2D
 @onready var exit: Area2D = get_node_or_null("Exit") as Area2D
 @onready var keycard: Area2D = get_node_or_null("Keycard") as Area2D
+@onready var boss_laser: Node2D = get_node_or_null("Laser") as Node2D
+@onready var boss_laser_line: Line2D = get_node_or_null("Laser/LaserLine") as Line2D
+@onready var boss_laser_core: Line2D = get_node_or_null("Laser/LaserCore") as Line2D
+@onready var boss_laser_hitbox: Area2D = get_node_or_null("Laser/LaserHitbox") as Area2D
+@onready var boss_laser_collision: CollisionShape2D = get_node_or_null("Laser/LaserHitbox/CollisionShape2D") as CollisionShape2D
+@onready var boss_laser_sound: AudioStreamPlayer = get_node_or_null("LaserSound") as AudioStreamPlayer
 @onready var interface: CanvasLayer = $Interface
 @onready var level_label: Label = $Interface/LevelLabel
 @onready var pause_button: Button = $Interface/PauseButton
@@ -35,6 +52,7 @@ const TUTORIAL_TEXTS: Array[String] = [
 @onready var boss_health_bar: ProgressBar = get_node_or_null("Interface/BossHealthBar") as ProgressBar
 @onready var death_overlay: ColorRect = $Interface/DeathOverlay
 @onready var death_restart_button: Button = $Interface/DeathOverlay/DeathPanel/Options/RestartButton
+@onready var minion_spawn_sound: AudioStreamPlayer = get_node_or_null("MinionSpawnSound") as AudioStreamPlayer
 @onready var health_hearts: Array[TextureRect] = [
 	$Interface/HealthHearts/Heart1,
 	$Interface/HealthHearts/Heart2,
@@ -67,6 +85,12 @@ var boss_minion_spawn_data: Array[Dictionary] = []
 var boss_minion_spawn_ratios: Array[float] = []
 var completed_boss_minion_waves: int = 0
 var boss_minions_wave_active: bool = false
+var boss_laser_spawn_ratios: Array[float] = []
+var completed_boss_laser_phases: int = 0
+var boss_laser_phase_active: bool = false
+var boss_laser_phase_elapsed: float = 0.0
+var boss_laser_has_hit_player: bool = false
+var boss_laser_blast_index: int = 0
 
 
 func _ready() -> void:
@@ -98,6 +122,7 @@ func _ready() -> void:
 		completion_items_revealed = true
 
 	setup_boss_health_bar()
+	setup_boss_laser_phase()
 
 	if enemies != null:
 		for enemy in enemies.get_children():
@@ -117,6 +142,10 @@ func _ready() -> void:
 	#print("NEW LEVEL: ", level_label.text)
 	check_enemies()
 	fade_in()
+
+
+func _process(delta: float) -> void:
+	update_boss_laser_phase(delta)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -279,15 +308,14 @@ func setup_boss_health_bar() -> void:
 
 
 func _on_boss_health_changed(current_health: int, maximum_health: int) -> void:
-	if boss_health_bar == null:
-		return
-
 	var health_ratio := 0.0 if maximum_health <= 0 else float(current_health) / float(maximum_health)
-	boss_health_bar.value = health_ratio * boss_health_bar.max_value
-	boss_health_bar_fill_style.bg_color = Color.RED
-	if boss_health_border != null:
-		boss_health_border.visible = boss_health_bar.visible
+	if boss_health_bar != null:
+		boss_health_bar.value = health_ratio * boss_health_bar.max_value
+		boss_health_bar_fill_style.bg_color = Color.RED
+		if boss_health_border != null:
+			boss_health_border.visible = boss_health_bar.visible
 	maybe_start_boss_minions_phase(current_health, maximum_health)
+	maybe_start_boss_laser_phase(current_health, maximum_health)
 
 
 func get_health_bar_color(health_ratio: float) -> Color:
@@ -356,6 +384,7 @@ func _on_enemy_defeated() -> void:
 		completed_boss_minion_waves += 1
 		set_boss_shooting_disabled(false)
 		set_boss_damage_disabled(false)
+		try_start_pending_boss_phase()
 	if are_enemies_defeated():
 		hide_boss_health_ui()
 	check_enemies()
@@ -387,7 +416,25 @@ func check_enemies() -> void:
 
 
 func are_enemies_defeated() -> bool:
-	return enemies == null or enemies.get_child_count() == 0
+	if enemies == null:
+		return true
+
+	for enemy in enemies.get_children():
+		if is_enemy_active_and_alive(enemy):
+			return false
+
+	return true
+
+
+func is_enemy_active_and_alive(enemy: Node) -> bool:
+	if not is_instance_valid(enemy) or enemy.is_queued_for_deletion():
+		return false
+	if enemy.get("is_dead") == true:
+		return false
+	if "health" in enemy and int(enemy.get("health")) <= 0:
+		return false
+
+	return enemy.process_mode != Node.PROCESS_MODE_DISABLED
 
 
 func setup_boss_minions_phase() -> void:
@@ -406,7 +453,7 @@ func setup_boss_minions_phase() -> void:
 
 
 func maybe_start_boss_minions_phase(current_health: int, maximum_health: int) -> void:
-	if boss_minion_spawn_ratios.is_empty() or boss_minions_wave_active or maximum_health <= 0:
+	if boss_minion_spawn_ratios.is_empty() or is_boss_phase_active() or maximum_health <= 0:
 		return
 	if completed_boss_minion_waves >= boss_minion_spawn_ratios.size():
 		return
@@ -422,6 +469,167 @@ func maybe_start_boss_minions_phase(current_health: int, maximum_health: int) ->
 	spawn_boss_minion_wave()
 
 
+func setup_boss_laser_phase() -> void:
+	boss_laser_spawn_ratios = get_boss_laser_spawn_ratios()
+	if boss_laser_hitbox != null:
+		boss_laser_hitbox.collision_layer = 0
+		boss_laser_hitbox.collision_mask = BOSS_LASER_COLLISION_MASK
+	reset_boss_laser()
+
+
+func maybe_start_boss_laser_phase(current_health: int, maximum_health: int) -> void:
+	if boss_laser_spawn_ratios.is_empty() or is_boss_phase_active() or maximum_health <= 0:
+		return
+	if completed_boss_laser_phases >= boss_laser_spawn_ratios.size():
+		return
+
+	var health_ratio := float(current_health) / float(maximum_health)
+	if health_ratio > boss_laser_spawn_ratios[completed_boss_laser_phases]:
+		return
+
+	start_boss_laser_phase()
+
+
+func get_boss_laser_spawn_ratios() -> Array[float]:
+	var spawn_ratios: Array[float] = boss_laser_health_threshold.duplicate()
+	spawn_ratios.sort()
+	spawn_ratios.reverse()
+	return spawn_ratios
+
+
+func start_boss_laser_phase() -> void:
+	if boss_laser == null or boss_laser_line == null or boss_laser_hitbox == null:
+		completed_boss_laser_phases += 1
+		return
+
+	boss_laser_phase_active = true
+	boss_laser_phase_elapsed = 0.0
+	boss_laser_has_hit_player = false
+	boss_laser_blast_index = 0
+	set_boss_shooting_disabled(true)
+	set_boss_damage_disabled(true)
+	keep_boss_alive_during_add_wave()
+	start_boss_laser_blast()
+
+
+func update_boss_laser_phase(delta: float) -> void:
+	if not boss_laser_phase_active:
+		return
+
+	boss_laser_phase_elapsed += delta
+	var fire_start_seconds := BOSS_LASER_CHARGE_SECONDS
+	var phase_end_seconds := fire_start_seconds + BOSS_LASER_FIRE_SECONDS
+
+	if boss_laser_phase_elapsed < fire_start_seconds:
+		update_boss_laser_charge()
+	elif boss_laser_phase_elapsed < phase_end_seconds:
+		fire_boss_laser()
+	else:
+		finish_boss_laser_blast()
+
+
+func start_boss_laser_blast() -> void:
+	boss_laser_phase_elapsed = 0.0
+	boss_laser_has_hit_player = false
+	set_boss_laser_hitbox_active(false)
+	boss_laser.visible = true
+	boss_laser.position.y = BOSS_LASER_BLAST_Y_POSITIONS[boss_laser_blast_index]
+	set_boss_laser_visual(BOSS_LASER_START_WIDTH, 0.3)
+	if boss_laser_sound != null:
+		boss_laser_sound.stop()
+		boss_laser_sound.play()
+
+
+func update_boss_laser_charge() -> void:
+	var charge_progress := clampf(boss_laser_phase_elapsed / BOSS_LASER_CHARGE_SECONDS, 0.0, 1.0)
+	var pulse := sin(Time.get_ticks_msec() * 0.02)
+	var laser_width := lerpf(BOSS_LASER_START_WIDTH, BOSS_LASER_END_WIDTH, charge_progress)
+	var laser_alpha := lerpf(0.3, 0.8 + pulse * 0.15, charge_progress)
+	set_boss_laser_visual(laser_width, laser_alpha)
+	set_boss_laser_hitbox_active(false)
+
+
+func fire_boss_laser() -> void:
+	set_boss_laser_visual(BOSS_LASER_END_WIDTH, 1.0)
+	set_boss_laser_hitbox_active(true)
+	damage_player_with_boss_laser()
+
+
+func finish_boss_laser_blast() -> void:
+	boss_laser_blast_index += 1
+	if boss_laser_blast_index < BOSS_LASER_BLAST_Y_POSITIONS.size():
+		start_boss_laser_blast()
+		return
+
+	finish_boss_laser_phase()
+
+
+func finish_boss_laser_phase() -> void:
+	completed_boss_laser_phases += 1
+	boss_laser_phase_active = false
+	reset_boss_laser()
+	set_boss_shooting_disabled(false)
+	set_boss_damage_disabled(false)
+	try_start_pending_boss_phase()
+
+
+func reset_boss_laser() -> void:
+	if boss_laser_sound != null:
+		boss_laser_sound.stop()
+	if boss_laser != null:
+		boss_laser.visible = false
+	set_boss_laser_visual(BOSS_LASER_START_WIDTH, 0.3)
+	set_boss_laser_hitbox_active(false)
+
+
+func set_boss_laser_visual(outer_width: float, alpha: float) -> void:
+	if boss_laser_line != null:
+		boss_laser_line.width = outer_width
+		boss_laser_line.modulate = Color(1.0, 1.0, 1.0, alpha)
+	if boss_laser_core != null:
+		var core_progress := inverse_lerp(0.3, 1.0, alpha)
+		var core_alpha := lerpf(BOSS_LASER_CORE_START_ALPHA, BOSS_LASER_CORE_END_ALPHA, core_progress)
+		boss_laser_core.width = outer_width * BOSS_LASER_CORE_WIDTH_RATIO
+		boss_laser_core.modulate = Color(1.0, 1.0, 1.0, core_alpha)
+
+
+func set_boss_laser_hitbox_active(is_active: bool) -> void:
+	if boss_laser_hitbox != null:
+		boss_laser_hitbox.monitoring = is_active
+	if boss_laser_collision != null:
+		boss_laser_collision.disabled = not is_active
+
+
+func damage_player_with_boss_laser() -> void:
+	if boss_laser_has_hit_player or boss_laser_collision == null or boss_laser_collision.shape == null:
+		return
+
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = boss_laser_collision.shape
+	query.transform = boss_laser_collision.global_transform
+	query.collision_mask = BOSS_LASER_COLLISION_MASK
+	query.collide_with_bodies = true
+	query.collide_with_areas = false
+
+	for result in get_world_2d().direct_space_state.intersect_shape(query):
+		if result["collider"] == player and player.has_method("take_damage"):
+			boss_laser_has_hit_player = true
+			player.take_damage(BOSS_LASER_DAMAGE)
+			return
+
+
+func try_start_pending_boss_phase() -> void:
+	if boss_enemy == null or not is_instance_valid(boss_enemy):
+		return
+
+	maybe_start_boss_minions_phase(int(boss_enemy.get("health")), int(boss_enemy.get("maximum_health")))
+	maybe_start_boss_laser_phase(int(boss_enemy.get("health")), int(boss_enemy.get("maximum_health")))
+
+
+func is_boss_phase_active() -> bool:
+	return boss_minions_wave_active or boss_laser_phase_active
+
+
 func are_boss_minions_defeated() -> bool:
 	for boss_minion in boss_minions:
 		if is_instance_valid(boss_minion) and boss_minion.is_inside_tree():
@@ -431,9 +639,6 @@ func are_boss_minions_defeated() -> bool:
 
 func get_boss_minion_spawn_ratios() -> Array[float]:
 	var spawn_ratios: Array[float] = boss_minions_spawn_health_threshold.duplicate()
-	if spawn_ratios.is_empty() and boss_minions_spawn_at_health_ratio > 0.0:
-		spawn_ratios.append(boss_minions_spawn_at_health_ratio)
-
 	spawn_ratios.sort()
 	spawn_ratios.reverse()
 	return spawn_ratios
@@ -450,6 +655,9 @@ func get_boss_minion_spawn_data(enemy: Node) -> Dictionary:
 
 
 func spawn_boss_minion_wave() -> void:
+	if minion_spawn_sound != null:
+		minion_spawn_sound.play()
+
 	var spawned_boss_minions: Array[Node] = []
 	for index in boss_minion_spawn_data.size():
 		var boss_minion := get_boss_minion_for_wave(index)
@@ -458,8 +666,8 @@ func spawn_boss_minion_wave() -> void:
 
 		spawned_boss_minions.append(boss_minion)
 		connect_boss_minion_signals(boss_minion)
-		set_enemy_active(boss_minion, true)
 		delay_boss_minion_shooting(boss_minion)
+		reveal_boss_minion(boss_minion)
 
 	boss_minions = spawned_boss_minions
 
@@ -499,6 +707,22 @@ func delay_boss_minion_shooting(boss_minion: Node) -> void:
 	boss_minion.set("shoot_cooldown_remaining", BOSS_MINION_INITIAL_SHOOT_DELAY_SECONDS)
 	boss_minion.set("burst_shots_remaining", 0)
 	boss_minion.set("burst_shot_interval_remaining", 0.0)
+
+
+func reveal_boss_minion(boss_minion: Node) -> void:
+	var canvas_item := boss_minion as CanvasItem
+	if canvas_item == null:
+		set_enemy_active(boss_minion, true)
+		return
+
+	canvas_item.modulate = Color(0.25, 0.7, 1.0, 0.0)
+	set_enemy_active(boss_minion, true)
+
+	var tween := create_tween()
+	tween.tween_property(canvas_item, "modulate", Color(0.65, 0.9, 1.0, 1.0), BOSS_MINION_SPAWN_FADE_SECONDS)
+	tween.tween_property(canvas_item, "modulate", Color.WHITE, 0.08)
+	tween.tween_property(canvas_item, "modulate", Color(0.25, 0.7, 1.0, 1.0), 0.08)
+	tween.tween_property(canvas_item, "modulate", Color.WHITE, 0.12)
 
 
 func set_boss_shooting_disabled(is_disabled: bool) -> void:
@@ -625,7 +849,7 @@ func setup_sound_toggle_button() -> void:
 	skip_level_button = BUTTON_SCENE.instantiate() as Button
 	skip_level_button.name = "SkipLevelButton"
 	skip_level_button.custom_minimum_size = Vector2(0, 32)
-	skip_level_button.add_theme_font_size_override("font_size", main_menu_button.get_theme_font_size("font_size"))
+	skip_level_button.add_theme_font_size_override("font_size", 20)
 	skip_level_button.text = "Skip Level"
 	skip_level_button.pressed.connect(_on_skip_level_button_pressed)
 	pause_options.add_child(skip_level_button)
@@ -634,7 +858,7 @@ func setup_sound_toggle_button() -> void:
 	sound_toggle_button = BUTTON_SCENE.instantiate() as Button
 	sound_toggle_button.name = "SoundToggleButton"
 	sound_toggle_button.custom_minimum_size = Vector2(0, 32)
-	sound_toggle_button.add_theme_font_size_override("font_size", main_menu_button.get_theme_font_size("font_size"))
+	sound_toggle_button.add_theme_font_size_override("font_size", 20)
 	sound_toggle_button.pressed.connect(_on_sound_toggle_button_pressed)
 	pause_options.add_child(sound_toggle_button)
 	pause_options.move_child(sound_toggle_button, main_menu_button.get_index())

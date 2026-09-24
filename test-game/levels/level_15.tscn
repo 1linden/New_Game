@@ -13,9 +13,12 @@
 [ext_resource type="PackedScene" uid="uid://c03ke8gwp0rgu" path="res://scenes/exit.tscn" id="8_om4q0"]
 [ext_resource type="PackedScene" uid="uid://d2skb8ugwnhsj" path="res://scenes/keycard.tscn" id="9_a50we"]
 [ext_resource type="PackedScene" uid="uid://c7tqvodb5ihp6" path="res://scenes/button.tscn" id="9_h2k5w"]
+[ext_resource type="Texture2D" uid="uid://db3vvobrslmrb" path="res://assets/visuals/laser_emitter.png" id="10_l2vy3"]
 [ext_resource type="Texture2D" uid="uid://cfa2h0kchbvts" path="res://assets/visuals/heart.png" id="11_g6v13"]
 [ext_resource type="Texture2D" uid="uid://dop2nticivh20" path="res://assets/visuals/blank_text_background.png" id="13_inh47"]
 [ext_resource type="FontFile" uid="uid://dpj6imxfo1147" path="res://assets/fonts/Oxanium-Bold.ttf" id="14_6uant"]
+[ext_resource type="AudioStream" uid="uid://dn0b6b7r7pb6o" path="res://assets/audio/laser.wav" id="14_7oc5t"]
+[ext_resource type="AudioStream" uid="uid://dflhop3ksydvi" path="res://assets/audio/minion_spawn.wav" id="17_t3bll"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wn4op"]
 size = Vector2(1280, 62)
@@ -25,6 +28,9 @@ size = Vector2(32, 720)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ck2xc"]
 size = Vector2(1278, 38)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t3bll"]
+size = Vector2(1283, 20)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3n2sn"]
 bg_color = Color(0, 0, 0, 1)
@@ -41,7 +47,8 @@ modulate_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
 script = ExtResource("1_3n2sn")
 completion_scene_path = "res://scenes/finish_game.tscn"
 reveal_completion_items_after_enemies_defeated = true
-boss_minions_spawn_health_threshold = Array[float]([0.75, 0.25])
+boss_minions_spawn_health_threshold = Array[float]([0.4, 0.8])
+boss_laser_health_threshold = Array[float]([0.2, 0.6])
 
 [node name="Background" type="Sprite2D" parent="." unique_id=1500914315]
 z_index = -2
@@ -118,18 +125,16 @@ scale = Vector2(1, 0.665)
 [node name="RobotBoss" parent="Enemies" unique_id=3519924 instance=ExtResource("5_01mlm")]
 position = Vector2(620, 490)
 scale = Vector2(4, 4)
-maximum_health = 200
-pistol_shoot_range = 1000.0
-smg_shoot_range = 1000.0
-sniper_shoot_range = 1000.0
 
 [node name="RobotSniper" parent="Enemies" unique_id=1839615594 instance=ExtResource("6_frcq8")]
 visible = false
 position = Vector2(295, 154)
+shoot_range = 650.0
 
 [node name="RobotSniper2" parent="Enemies" unique_id=246525871 instance=ExtResource("6_frcq8")]
 visible = false
 position = Vector2(973, 154)
+shoot_range = 650.0
 
 [node name="RobotPistol" parent="Enemies" unique_id=1001928399 instance=ExtResource("7_t3bll")]
 visible = false
@@ -140,7 +145,7 @@ visible = false
 position = Vector2(1016, 616)
 
 [node name="Player" parent="." unique_id=1662097633 instance=ExtResource("8_l2vy3")]
-position = Vector2(227.99998, 138)
+position = Vector2(654, 138)
 scale = Vector2(0.3809488, 0.3809488)
 
 [node name="BoosterPadLeft" parent="." unique_id=1033171433 instance=ExtResource("7_i1ncm")]
@@ -151,15 +156,61 @@ scale = Vector2(0.75, 0.75)
 position = Vector2(1223, 624)
 scale = Vector2(0.75, 0.75)
 
-[node name="Exit" parent="." unique_id=450364295 instance=ExtResource("8_om4q0")]
+[node name="Laser" type="Node2D" parent="." unique_id=694885072]
 visible = false
+position = Vector2(971, 605)
+
+[node name="LaserLine" type="Line2D" parent="Laser" unique_id=1872715553]
+modulate = Color(1, 1, 1, 0.3)
+position = Vector2(15.825517, 0)
+scale = Vector2(0.9744262, 1)
+points = PackedVector2Array(-1001, -1, 286, -1)
+width = 5.0
+default_color = Color(0.9882353, 0, 0, 1)
+
+[node name="LaserCore" type="Line2D" parent="Laser" unique_id=834498912]
+modulate = Color(1, 1, 1, 0.1)
+position = Vector2(15.825517, 0)
+scale = Vector2(0.9744262, 1)
+points = PackedVector2Array(-1001, -1, 286, -1)
+width = 1.0
+
+[node name="LaserHitbox" type="Area2D" parent="Laser" unique_id=1984673349]
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Laser/LaserHitbox" unique_id=576072044]
+position = Vector2(-330.5, -0.97998047)
+shape = SubResource("RectangleShape2D_t3bll")
+disabled = true
+
+[node name="LaserEmitterLeft" type="Sprite2D" parent="Laser" unique_id=1795130129]
+position = Vector2(-959, 0.020019531)
+scale = Vector2(0.20374143, 0.20374143)
+texture = ExtResource("10_l2vy3")
+
+[node name="LaserEmitterRight" type="Sprite2D" parent="Laser" unique_id=460756993]
+position = Vector2(297, 0.020019531)
+scale = Vector2(0.20374143, 0.20374143)
+texture = ExtResource("10_l2vy3")
+flip_h = true
+
+[node name="Exit" parent="." unique_id=450364295 instance=ExtResource("8_om4q0")]
 z_index = -1
 position = Vector2(640, 571)
 next_level_path = "res://scenes/finish_game.tscn"
 
 [node name="Keycard" parent="." unique_id=725782424 instance=ExtResource("9_a50we")]
-visible = false
 position = Vector2(640, 185)
+
+[node name="MinionSpawnSound" type="AudioStreamPlayer" parent="." unique_id=448355786]
+stream = ExtResource("17_t3bll")
+volume_db = -10.0
+
+[node name="LaserSound" type="AudioStreamPlayer" parent="." unique_id=795419165]
+stream = ExtResource("14_7oc5t")
+volume_db = -17.5
 
 [node name="Interface" type="CanvasLayer" parent="." unique_id=1686991459]
 
@@ -268,19 +319,19 @@ theme_override_constants/separation = 12
 [node name="ResumeButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=921503771 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Resume"
 
 [node name="RestartButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=1285877113 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Restart"
 
 [node name="MainMenuButton" parent="Interface/PauseOverlay/PausePanel/Options" unique_id=1377104583 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Main Menu"
 
 [node name="DeathOverlay" type="ColorRect" parent="Interface" unique_id=2020672260]
@@ -336,5 +387,5 @@ vertical_alignment = 1
 [node name="RestartButton" parent="Interface/DeathOverlay/DeathPanel/Options" unique_id=868041584 instance=ExtResource("9_h2k5w")]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Restart Level"

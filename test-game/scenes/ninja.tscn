@@ -274,7 +274,7 @@ size = Vector2(106.497635, 21.575256)
 size = Vector2(101.98134, 21.320942)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4s42a"]
-size = Vector2(92.082794, 20.30562)
+size = Vector2(6.755966, 16.022732)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kxikb"]
 size = Vector2(162.79929, 18.572052)
@@ -292,7 +292,7 @@ size = Vector2(106.497635, 21.575256)
 size = Vector2(101.98134, 21.320942)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yqui3"]
-size = Vector2(92.082794, 20.30562)
+size = Vector2(8.493217, 16.29776)
 
 [node name="Ninja" type="CharacterBody2D" unique_id=1874358290 groups=["player"]]
 collision_layer = 2
@@ -360,7 +360,6 @@ position = Vector2(-33, 49.5)
 shape = SubResource("RectangleShape2D_1251g")
 
 [node name="CollisionStanding" type="CollisionShape2D" parent="." unique_id=546743867]
-visible = false
 position = Vector2(-31, 36.5)
 shape = SubResource("RectangleShape2D_wn4op")
 
@@ -480,7 +479,7 @@ shape = SubResource("RectangleShape2D_bpcnm")
 
 [node name="CollisionSwordAttack5" type="CollisionShape2D" parent="Sword" unique_id=1814752137]
 visible = false
-position = Vector2(-138.32477, -12.406771)
+position = Vector2(-98.82329, 3.8531837)
 rotation = 0.3403392
 shape = SubResource("RectangleShape2D_4s42a")
 
@@ -516,6 +515,6 @@ shape = SubResource("RectangleShape2D_xbycq")
 
 [node name="CollisionSwordAttack5Flipped" type="CollisionShape2D" parent="Sword" unique_id=30875728]
 visible = false
-position = Vector2(139, -11.999996)
+position = Vector2(100.271416, 3.8403783)
 rotation = -0.3403392
 shape = SubResource("RectangleShape2D_yqui3")
