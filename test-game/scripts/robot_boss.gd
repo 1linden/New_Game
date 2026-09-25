@@ -3,7 +3,7 @@ extends CharacterBody2D
 signal defeated
 signal health_changed(current_health: int, maximum_health: int)
 
-const OVERHEAT_WARNING_SOUND_MARKS: Array[float] = [3.0, 3.33, 3.66, 4.0, 4.25, 4.5, 4.75]
+const GUN_OVERHEAT_WARNING_SOUND_MARKS: Array[float] = [3.0, 3.33, 3.66, 4.0, 4.25, 4.5, 4.75]
 
 @export var maximum_health: int = 1500
 @export var bullet_scene: PackedScene
@@ -40,7 +40,7 @@ var shooting_disabled: bool = false
 var damage_disabled: bool = false
 var has_acquired_player_line_of_sight: bool = false
 var gun_overheat_bar_fill_style := StyleBoxFlat.new()
-var overheat_warning_sound_marks_played: Array[bool] = []
+var gun_overheat_warning_sound_marks_played: Array[bool] = []
 
 @onready var robot_left: Sprite2D = find_optional_node("RobotLeft", "Sprite2DLeft") as Sprite2D
 @onready var robot_right: Sprite2D = find_optional_node("RobotRight", "Sprite2DRight") as Sprite2D
@@ -65,13 +65,13 @@ var overheat_warning_sound_marks_played: Array[bool] = []
 @onready var enemy_take_damage_sound: AudioStreamPlayer = $EnemyTakeDamageSound
 @onready var explosion_sound: AudioStreamPlayer = $ExplosionSound
 @onready var gun_overheat_steam_sound: AudioStreamPlayer = $GunOverheatSteamSound
-@onready var overheat_warning_sound: AudioStreamPlayer = $OverheatWarningSound
+@onready var gun_overheat_warning_sound: AudioStreamPlayer = $GunOverheatWarningSound
 @onready var gun_overheat_bar: ProgressBar = get_node_or_null("GunOverheatBar") as ProgressBar
 
 
 func _ready() -> void:
 	health = maximum_health
-	reset_overheat_warning_sound_marks()
+	reset_gun_overheat_warning_sound_marks()
 	setup_gun_hitboxes()
 	setup_gun_overheat_bar()
 	setup_gun_overheat_steam_particles()
@@ -322,14 +322,14 @@ func update_gun_overheat_bar() -> void:
 		return
 	if is_dead:
 		gun_overheat_bar.visible = false
-		reset_overheat_warning_sound_marks()
+		reset_gun_overheat_warning_sound_marks()
 		return
 
 	var bar_ratio := get_gun_overheat_bar_ratio()
 	if bar_ratio <= 0.0:
-		reset_overheat_warning_sound_marks()
+		reset_gun_overheat_warning_sound_marks()
 	else:
-		play_scheduled_overheat_warning_sounds()
+		play_scheduled_gun_overheat_warning_sounds()
 
 	gun_overheat_bar.visible = bar_ratio > 0.0 and is_gun_overheat_bar_flash_visible()
 	gun_overheat_bar.value = bar_ratio * gun_overheat_bar.max_value
@@ -351,28 +351,28 @@ func get_gun_overheat_bar_color(bar_ratio: float) -> Color:
 	return Color.GRAY.lerp(Color.RED, bar_ratio)
 
 
-func play_scheduled_overheat_warning_sounds() -> void:
+func play_scheduled_gun_overheat_warning_sounds() -> void:
 	if gun_overheat_cooldown_remaining > 0.0 or not gun_heat_increasing:
 		return
 
 	var warning_elapsed := gun_heat_seconds - gun_overheat_warning_seconds
-	for index in range(OVERHEAT_WARNING_SOUND_MARKS.size()):
-		if overheat_warning_sound_marks_played[index]:
+	for index in range(GUN_OVERHEAT_WARNING_SOUND_MARKS.size()):
+		if gun_overheat_warning_sound_marks_played[index]:
 			continue
-		if warning_elapsed >= OVERHEAT_WARNING_SOUND_MARKS[index]:
-			overheat_warning_sound_marks_played[index] = true
-			play_overheat_warning_sound()
+		if warning_elapsed >= GUN_OVERHEAT_WARNING_SOUND_MARKS[index]:
+			gun_overheat_warning_sound_marks_played[index] = true
+			play_gun_overheat_warning_sound()
 
 
-func reset_overheat_warning_sound_marks() -> void:
-	overheat_warning_sound_marks_played.clear()
-	for _index in range(OVERHEAT_WARNING_SOUND_MARKS.size()):
-		overheat_warning_sound_marks_played.append(false)
+func reset_gun_overheat_warning_sound_marks() -> void:
+	gun_overheat_warning_sound_marks_played.clear()
+	for _index in range(GUN_OVERHEAT_WARNING_SOUND_MARKS.size()):
+		gun_overheat_warning_sound_marks_played.append(false)
 
 
-func play_overheat_warning_sound() -> void:
-	if overheat_warning_sound != null:
-		overheat_warning_sound.play()
+func play_gun_overheat_warning_sound() -> void:
+	if gun_overheat_warning_sound != null:
+		gun_overheat_warning_sound.play()
 
 
 func is_gun_overheat_bar_flash_visible() -> bool:

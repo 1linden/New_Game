@@ -7,6 +7,7 @@ enum BlockWalkState { NONE, ENTERING, WALKING, EXITING, EXITING_TO_WALK }
 
 const SWORD_COLLISION_LAYER := 64
 const SWORD_COLLISION_MASK := 4
+const SWORD_OBSTRUCTION_MASK := 1 | SWORD_COLLISION_MASK
 
 @export var movement_speed: float = 250.0
 @export var sprint_multiplier: float = 1.5
@@ -360,6 +361,8 @@ func handle_attack_damage() -> void:
 		var robot := get_attack_damage_target(collider)
 		if robot == null or robot in enemies_hit_this_attack or not robot.has_method("take_damage"):
 			continue
+		if is_sword_hit_obstructed(robot):
+			continue
 
 		enemies_hit_this_attack.append(robot)
 		robot.take_damage(attack_damage)
@@ -374,6 +377,24 @@ func get_attack_damage_target(collider: Node) -> Node:
 		current_node = current_node.get_parent()
 
 	return null
+
+
+func is_sword_hit_obstructed(robot: Node) -> bool:
+	var robot_node := robot as Node2D
+	if robot_node == null:
+		return true
+
+	var query := PhysicsRayQueryParameters2D.create(global_position, robot_node.global_position, SWORD_OBSTRUCTION_MASK)
+	query.exclude = [self, sword]
+	query.collide_with_areas = true
+	query.collide_with_bodies = true
+
+	var result := get_world_2d().direct_space_state.intersect_ray(query)
+	if result.is_empty():
+		return false
+
+	var first_collider := result["collider"] as Node
+	return get_attack_damage_target(first_collider) != robot
 
 
 func get_current_attack_collision() -> CollisionShape2D:

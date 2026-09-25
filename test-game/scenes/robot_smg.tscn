@@ -43,7 +43,7 @@ shape = SubResource("RectangleShape2D_xwavj")
 
 [node name="GunshotSound" type="AudioStreamPlayer" parent="." unique_id=836502191]
 stream = ExtResource("4_sycts")
-volume_db = -5.0
+volume_db = -7.5
 
 [node name="EnemyTakeDamageSound" type="AudioStreamPlayer" parent="." unique_id=735049282]
 stream = ExtResource("5_4ru31")
