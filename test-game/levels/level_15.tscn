@@ -210,7 +210,7 @@ volume_db = -10.0
 
 [node name="LaserSound" type="AudioStreamPlayer" parent="." unique_id=795419165]
 stream = ExtResource("14_7oc5t")
-volume_db = -17.5
+volume_db = -12.5
 
 [node name="Interface" type="CanvasLayer" parent="." unique_id=1686991459]
 

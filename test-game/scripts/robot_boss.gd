@@ -3,7 +3,7 @@ extends CharacterBody2D
 signal defeated
 signal health_changed(current_health: int, maximum_health: int)
 
-const OVERHEAT_WARNING_SOUND_MARKS: Array[float] = [1.0, 2.0, 2.5, 3.0, 3.33, 3.66, 4.0, 4.25, 4.5, 4.75]
+const OVERHEAT_WARNING_SOUND_MARKS: Array[float] = [3.0, 3.33, 3.66, 4.0, 4.25, 4.5, 4.75]
 
 @export var maximum_health: int = 1500
 @export var bullet_scene: PackedScene
