@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://c0td2ttgvvn56"]
+
+[ext_resource type="Texture2D" uid="uid://rqvidxntm3sq" path="res://assets/visuals/levelbackground.png" id="1_6bmau"]
+[ext_resource type="Script" uid="uid://cqps3mmdbw1cr" path="res://scripts/finish_game.gd" id="1_og8p0"]
+[ext_resource type="PackedScene" uid="uid://c7tqvodb5ihp6" path="res://scenes/button.tscn" id="2_gn7qg"]
+[ext_resource type="Texture2D" uid="uid://cj6eg0nekbjhj" path="res://assets/visuals/game_completed.png" id="3_5club"]
+[ext_resource type="AudioStream" uid="uid://cy7f6q7xia4sg" path="res://assets/audio/finish_game.wav" id="5_ikfhb"]
+
+[node name="FinishGameScreen" type="Control" unique_id=645552225]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_og8p0")
+
+[node name="FinishGameImage" type="TextureRect" parent="." unique_id=90961528]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_6bmau")
+
+[node name="GameCompleted" type="TextureRect" parent="." unique_id=35342804]
+layout_mode = 0
+offset_left = 289.0
+offset_top = 82.0
+offset_right = 1069.0
+offset_bottom = 417.0
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("3_5club")
+
+[node name="MainMenu" parent="." unique_id=868041584 instance=ExtResource("2_gn7qg")]
+layout_mode = 0
+offset_left = 460.0
+offset_top = 451.0
+offset_right = 820.0
+offset_bottom = 530.0
+theme_override_font_sizes/font_size = 45
+text = "MAIN MENU"
+
+[node name="FinishGameSound" type="AudioStreamPlayer" parent="." unique_id=1474583542]
+stream = ExtResource("5_ikfhb")
+volume_db = -5.0
+autoplay = true

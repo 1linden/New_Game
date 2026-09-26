@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://c2heetwx4rlji"]
+
+[ext_resource type="Texture2D" uid="uid://fftaidl1k3in" path="res://assets/visuals/metal_platform.png" id="1_63rr4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_55ytl"]
+size = Vector2(244, 30)
+
+[node name="Platform" type="StaticBody2D" unique_id=1665421905]
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1785365543]
+scale = Vector2(0.4885361, 0.3473919)
+texture = ExtResource("1_63rr4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1796517214]
+shape = SubResource("RectangleShape2D_55ytl")

@@ -1,0 +1,179 @@
+[gd_scene format=3 uid="uid://vpv0ikq1gp1e"]
+
+[ext_resource type="Script" uid="uid://8wkysgi7dwg1" path="res://scripts/robot_boss.gd" id="1_boss"]
+[ext_resource type="Texture2D" uid="uid://b2hs5ifulb2gd" path="res://assets/visuals/killer_robot.png" id="3_rs1br"]
+[ext_resource type="AudioStream" uid="uid://b7padyv0jbbbi" path="res://assets/audio/laser_gunshot_light.wav" id="4_st5u7"]
+[ext_resource type="AudioStream" uid="uid://cuw7hny8hcmn0" path="res://assets/audio/enemy_take_damage.wav" id="5_70mhf"]
+[ext_resource type="AudioStream" uid="uid://job7qc5bt4m1" path="res://assets/audio/laser_gunshot_heavy.wav" id="5_st5u7"]
+[ext_resource type="Texture2D" uid="uid://cu2bosqwx35n7" path="res://assets/visuals/robot_boss_gun2.png" id="6_bv1mr"]
+[ext_resource type="AudioStream" uid="uid://cm3bnr0gmwmsk" path="res://assets/audio/gun_overheat_steam.wav" id="6_op8rb"]
+[ext_resource type="PackedScene" uid="uid://ccg1ga1e4mhwf" path="res://scenes/bullet_light.tscn" id="7_boss"]
+[ext_resource type="AudioStream" uid="uid://uxcgffn8q2pg" path="res://assets/audio/gun_overheat_warning.wav" id="8_52vqv"]
+[ext_resource type="AudioStream" uid="uid://d0umnpxbwgr3t" path="res://assets/audio/explosion.wav" id="8_70mhf"]
+[ext_resource type="Texture2D" uid="uid://co0w1dcu20rgu" path="res://assets/visuals/smoke_particle.png" id="8_rs1br"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bv1mr"]
+size = Vector2(45, 34)
+
+[sub_resource type="Gradient" id="Gradient_rs1br"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_rs1br"]
+gradient = SubResource("Gradient_rs1br")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rs1br"]
+particle_flag_disable_z = true
+emission_shape_scale = Vector3(344.72, 354.475, 1)
+emission_shape = 3
+emission_box_extents = Vector3(1, 1, 1)
+direction = Vector3(48.87, 0, 0)
+spread = 100.0
+initial_velocity_min = 40.0
+initial_velocity_max = 90.0
+gravity = Vector3(0, -100, 0)
+damping_min = 50.000004
+damping_max = 70.0
+scale_min = 0.59999996
+scale_max = 1.3
+color = Color(1, 1, 1, 0.6666667)
+color_ramp = SubResource("GradientTexture1D_rs1br")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0ufy4"]
+size = Vector2(45, 34)
+
+[node name="RobotBoss" type="CharacterBody2D" unique_id=3519924]
+collision_layer = 32
+script = ExtResource("1_boss")
+bullet_scene = ExtResource("7_boss")
+
+[node name="RobotLeft" type="Sprite2D" parent="." unique_id=329513902]
+z_index = 2
+position = Vector2(5, 0)
+scale = Vector2(0.08225535, 0.08364154)
+texture = ExtResource("3_rs1br")
+
+[node name="CollisionLeft" type="CollisionPolygon2D" parent="." unique_id=58991724]
+polygon = PackedVector2Array(29, 42, -28, 42, -27, 31, -22, 14, -16, -1, -20, -14, -14, -23, -16, -32, -10, -43, 6, -43, 13, -32, 25, -22, 38, 6, 40, 16)
+
+[node name="RobotRight" type="Sprite2D" parent="." unique_id=1608574324]
+z_index = 2
+position = Vector2(5, 0)
+scale = Vector2(0.08225535, 0.08364154)
+texture = ExtResource("3_rs1br")
+flip_h = true
+
+[node name="CollisionRight" type="CollisionPolygon2D" parent="." unique_id=1488896629]
+position = Vector2(10, 0)
+scale = Vector2(-1, 1)
+polygon = PackedVector2Array(29, 42, -28, 42, -27, 31, -22, 14, -16, -1, -20, -14, -14, -23, -16, -32, -10, -43, 6, -43, 13, -32, 25, -22, 38, 6, 40, 16)
+
+[node name="LightGunshotSound" type="AudioStreamPlayer" parent="." unique_id=836502191]
+stream = ExtResource("4_st5u7")
+volume_db = -12.5
+
+[node name="HeavyGunshotSound" type="AudioStreamPlayer" parent="." unique_id=831750741]
+stream = ExtResource("5_st5u7")
+volume_db = -12.5
+
+[node name="EnemyTakeDamageSound" type="AudioStreamPlayer" parent="." unique_id=735049282]
+stream = ExtResource("5_70mhf")
+
+[node name="GunOverheatSteamSound" type="AudioStreamPlayer" parent="." unique_id=1129621353]
+stream = ExtResource("6_op8rb")
+volume_db = -12.5
+
+[node name="GunOverheatWarningSound" type="AudioStreamPlayer" parent="." unique_id=145293836]
+stream = ExtResource("8_52vqv")
+volume_db = -10.0
+
+[node name="ExplosionSound" type="AudioStreamPlayer" parent="." unique_id=1510509976]
+stream = ExtResource("8_70mhf")
+volume_db = -5.0
+
+[node name="GunOverheatBar" type="ProgressBar" parent="." unique_id=1358072934]
+visible = false
+offset_left = -27.0
+offset_top = -52.0
+offset_right = 37.0
+offset_bottom = -44.0
+mouse_filter = 2
+show_percentage = false
+
+[node name="GunPivotLeft" type="Node2D" parent="." unique_id=1070630540]
+position = Vector2(-16, -14)
+
+[node name="BulletSpawnLeftSniper" type="Marker2D" parent="GunPivotLeft" unique_id=921435005]
+position = Vector2(-49, -10)
+gizmo_extents = 2.0
+
+[node name="BulletSpawnLeftSmg" type="Marker2D" parent="GunPivotLeft" unique_id=367841794]
+position = Vector2(-48, 1)
+gizmo_extents = 2.0
+
+[node name="BulletSpawnLeftPistol" type="Marker2D" parent="GunPivotLeft" unique_id=375582801]
+position = Vector2(-48, 12)
+gizmo_extents = 2.0
+
+[node name="GunLeft" type="Sprite2D" parent="GunPivotLeft" unique_id=628220458]
+position = Vector2(-21, -1)
+scale = Vector2(0.061708856, 0.061708864)
+texture = ExtResource("6_bv1mr")
+metadata/_edit_lock_ = true
+
+[node name="GunHitboxLeft" type="Area2D" parent="GunPivotLeft" unique_id=956364813]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GunPivotLeft/GunHitboxLeft" unique_id=673265844]
+position = Vector2(-27, -1)
+shape = SubResource("RectangleShape2D_bv1mr")
+
+[node name="SteamParticlesLeft" type="GPUParticles2D" parent="GunPivotLeft" unique_id=8865105]
+position = Vector2(-32, -7)
+scale = Vector2(0.05, 0.05)
+emitting = false
+amount = 200
+texture = ExtResource("8_rs1br")
+lifetime = 4.0
+one_shot = true
+explosiveness = 1.0
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_rs1br")
+
+[node name="GunPivotRight" type="Node2D" parent="." unique_id=250781770]
+position = Vector2(26, -14)
+
+[node name="BulletSpawnRightSniper" type="Marker2D" parent="GunPivotRight" unique_id=448319541]
+position = Vector2(49, -10)
+gizmo_extents = 2.0
+
+[node name="BulletSpawnRightSmg" type="Marker2D" parent="GunPivotRight" unique_id=2011367396]
+position = Vector2(48, 1)
+gizmo_extents = 2.0
+
+[node name="BulletSpawnRightPistol" type="Marker2D" parent="GunPivotRight" unique_id=111832]
+position = Vector2(48, 12)
+gizmo_extents = 2.0
+
+[node name="GunRight" type="Sprite2D" parent="GunPivotRight" unique_id=1499840108]
+position = Vector2(21, -1)
+scale = Vector2(0.061708856, 0.061708864)
+texture = ExtResource("6_bv1mr")
+flip_h = true
+metadata/_edit_lock_ = true
+
+[node name="GunHitboxRight" type="Area2D" parent="GunPivotRight" unique_id=1548883545]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GunPivotRight/GunHitboxRight" unique_id=1536838933]
+position = Vector2(27.5, -1)
+shape = SubResource("RectangleShape2D_0ufy4")
+
+[node name="SteamParticlesRight" type="GPUParticles2D" parent="GunPivotRight" unique_id=921534963]
+position = Vector2(31.999992, -7)
+scale = Vector2(0.05, 0.05)
+emitting = false
+amount = 200
+texture = ExtResource("8_rs1br")
+lifetime = 4.0
+one_shot = true
+explosiveness = 1.0
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_rs1br")
